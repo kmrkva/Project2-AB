@@ -1,0 +1,74 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Figma Redesign Tips · Project 2</title>
+<style>
+:root{--bg:#FAF8F3;--card:#FFFFFF;--ink:#1F2A44;--muted:#4A5568;--accent:#B4472F;--line:#DDD5C6;--code:#F1EDE4}
+@media (prefers-color-scheme:dark){:root{--bg:#161B26;--card:#1F2533;--ink:#EEF0F4;--muted:#B7BECB;--accent:#E8876F;--line:#343C4D;--code:#262D3D}}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font:17px/1.6 system-ui,-apple-system,"Segoe UI",Roboto,sans-serif}
+main{max-width:760px;margin:0 auto;padding:40px 16px 80px}
+.eyebrow{color:var(--accent);font-weight:700;letter-spacing:.12em;text-transform:uppercase;font-size:13px;margin:0}
+h1{font-family:Georgia,serif;font-size:36px;line-height:1.15;margin:6px 0 12px}
+h2{font-size:22px;margin:40px 0 10px}
+p,li{color:var(--muted)}
+b,strong{color:var(--ink)}
+ol,ul{padding-left:22px}
+li{margin:6px 0}
+.card{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:18px 20px;margin:16px 0}
+kbd{background:var(--code);border:1px solid var(--line);border-radius:4px;padding:1px 6px;font-size:14px;color:var(--ink)}
+a{color:var(--accent)}
+nav{font-size:15px;margin-bottom:28px}
+</style>
+</head>
+<body>
+<main>
+<nav><a href="../">← All Project 2 guides</a></nav>
+<p class="eyebrow">Project 2 · Redesign guide</p>
+<h1>Making your redesign in Figma</h1>
+<p>Figma is free in the browser at <a href="https://www.figma.com">figma.com</a> and is great for layouts: covering and replacing text, adding badges or labels, swapping images, and rearranging page elements. Shortcuts below show Windows <kbd>Ctrl</kbd> / Mac <kbd>Cmd</kbd>.</p>
+
+<h2>1. Set up Before and After</h2>
+<ol>
+<li>Create a new <b>Design file</b> and paste your Before screenshot (<kbd>Ctrl/Cmd</kbd>+<kbd>V</kbd>).</li>
+<li>With the image selected, press <kbd>Ctrl/Cmd</kbd>+<kbd>Alt/Option</kbd>+<kbd>G</kbd> to wrap it in a frame. The frame matches the image's size. Name it "Before."</li>
+<li>Duplicate the frame (<kbd>Ctrl/Cmd</kbd>+<kbd>D</kbd>), drag the copy beside the original, and name it "After." <b>Only ever edit the After frame.</b></li>
+<li>Lock the screenshot inside After (<kbd>Shift</kbd>+<kbd>Ctrl/Cmd</kbd>+<kbd>L</kbd>) so you don't nudge it by accident.</li>
+</ol>
+
+<h2>2. Cover or remove something</h2>
+<ol>
+<li>Draw a rectangle (<kbd>R</kbd>) over the element you want to hide.</li>
+<li>In the right panel, click the fill color, then the eyedropper (or press <kbd>I</kbd>), and click the background right next to the element. Now it blends in.</li>
+<li>On textured or photo backgrounds, a flat rectangle will show. Use an image editor or AI for those parts instead.</li>
+</ol>
+
+<h2>3. Add or change text</h2>
+<ol>
+<li>Cover the old text (step 2), then press <kbd>T</kbd> and click to type.</li>
+<li>Match the font in the right panel. Figma includes all Google Fonts; if you don't know the site's font, a tool like WhatTheFont can identify it from a screenshot, or pick a close look-alike.</li>
+<li>Match the color with the eyedropper, and match the size by comparing against nearby text.</li>
+</ol>
+
+<h2>4. Add or replace an image</h2>
+<ol>
+<li>Drag the new image in, or use <kbd>Shift</kbd>+<kbd>Ctrl/Cmd</kbd>+<kbd>K</kbd> to place it.</li>
+<li>Resize from a corner while holding <kbd>Shift</kbd> so it doesn't stretch. To crop, double-click the image and choose Crop.</li>
+<li>Make it exactly the same size and position as the image it replaces: copy the W, H, X, and Y numbers from the right panel.</li>
+</ol>
+
+<h2>5. Export</h2>
+<ol>
+<li>Select the After frame. At the bottom of the right panel, under <b>Export</b>, click <b>+</b>, choose <b>PNG</b> at <b>1x</b>, and export.</li>
+<li>Export Before the same way, so both come from the same pipeline.</li>
+<li>Check that both files have the same pixel dimensions (Windows: right-click › Properties › Details; Mac: open in Preview › Tools › Show Inspector).</li>
+</ol>
+
+<div class="card">
+<p><b>Final check: the flip test.</b> Look at Before and After side by side. If anything differs besides your concept (size, crop, price, a stray pixel of old text), fix it before submitting.</p>
+</div>
+</main>
+</body>
+</html>

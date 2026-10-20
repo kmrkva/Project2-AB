@@ -1,0 +1,81 @@
+/* Consumer Behavior Test Lab — shared look for the study page and the tutorial preview.
+   Everything is scoped under .lab so it can live inside other pages. */
+.lab{
+  --bg:#0a0a0a; --panel:#111827; --panel-2:#0f172a; --line:#1f2937; --line-2:#334155;
+  --text:#f8fafc; --muted:#94a3b8; --dim:#64748b;
+  --green:#22c55e; --green-2:#4ade80; --star:#f59e0b;
+  --sans:"Outfit",system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;
+  --mono:"JetBrains Mono",ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;
+  background:var(--bg); color:var(--text); font-family:var(--sans);
+}
+.lab *{box-sizing:border-box}
+.lab button{font-family:inherit}
+
+/* stage = the area a trial is drawn in; container queries keep the preview and the real page identical */
+.lab .stage{container-type:inline-size;width:100%}
+.lab .trial{max-width:720px}
+.lab .searchline{font-family:var(--mono);font-size:12px;color:var(--dim);margin:0 0 6px}
+.lab .cat-title{font-family:var(--sans);font-size:28px;font-weight:700;margin:0 0 14px;line-height:1.2;color:var(--text)}
+.lab .qbanner{display:flex;flex-direction:column;gap:6px;background:var(--panel-2);border:1px solid var(--line-2);border-left:6px solid var(--green-2);border-radius:14px;padding:14px 18px;margin-bottom:16px}
+.lab .qbanner .qt{font-size:24px;font-weight:700;line-height:1.25}
+.lab .grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:20px}
+.lab .card{background:var(--panel);border:1px solid var(--line);border-radius:18px;display:flex;flex-direction:column;position:relative;transition:border-color .15s}
+.lab .card.chosen{border-color:var(--green)}
+/* stacked layout for wide images: products one above the other, details to the right */
+.lab .trial.wide{max-width:860px}
+.lab .grid.stack{grid-template-columns:minmax(0,1fr);gap:16px}
+.lab .grid.stack .card{flex-direction:row}
+.lab .grid.stack .imgwrap{flex:1 1 auto;min-width:0;border-radius:17px 0 0 17px}
+.lab .grid.stack .info{flex:0 0 210px}
+.lab .grid.stack .imgwrap img{padding:2.5%}
+.lab .imgwrap{position:relative;aspect-ratio:1/1;border-radius:17px 17px 0 0;overflow:hidden;display:flex;align-items:center;justify-content:center}
+.lab .imgwrap img{width:100%;height:100%;object-fit:contain;padding:6%;display:block;-webkit-user-drag:none;user-select:none}
+.lab .ph{width:100%;height:100%;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:8px;color:#64748b;font-family:var(--mono);font-size:12px;text-align:center;padding:12px}
+.lab .ph svg{width:34%;max-width:110px;opacity:.55}
+.lab .badge{position:absolute;top:10px;left:10px;font-size:12px;font-weight:600;padding:5px 10px;border-radius:7px;line-height:1.1;background:#c2410c;color:#fff;max-width:calc(100% - 20px)}
+.lab .info{padding:14px 16px 16px;display:flex;flex-direction:column;gap:6px;flex:1}
+.lab .brand{font-size:18px;font-weight:700;line-height:1.2}
+.lab .rating{display:flex;align-items:center;gap:6px;font-size:13.5px;color:#e2e8f0;flex-wrap:wrap}
+.lab .stars{position:relative;display:inline-block;font-size:14px;letter-spacing:1px;line-height:1}
+.lab .stars .base{color:#475569}
+.lab .stars .fill{position:absolute;left:0;top:0;overflow:hidden;white-space:nowrap;color:var(--star)}
+.lab .rcount{color:#7dd3fc}
+.lab .pop{font-size:13px;color:var(--muted)}
+.lab .price{font-size:22px;font-weight:700;color:var(--green);margin-top:2px}
+.lab .price sup{font-size:.55em;vertical-align:.6em;margin-left:1px}
+.lab .ship{font-family:var(--mono);font-size:11px;color:var(--dim)}
+.lab .spacer{flex:1}
+.lab .buy{margin-top:8px;width:100%;background:#000;color:#fff;border:1px solid var(--line-2);border-radius:12px;padding:12px 10px;font-size:15px;font-weight:600;cursor:pointer;transition:border-color .15s,background .15s;line-height:1.25}
+.lab .buy:hover,.lab .buy:focus-visible{border-color:var(--green);outline:none}
+.lab .buy:disabled{cursor:default}
+.lab .card.chosen .buy{background:var(--green);color:#04130a;border-color:var(--green)}
+
+.lab .fu{margin-top:18px;background:var(--panel-2);border:1px solid var(--line-2);border-radius:14px;padding:14px 18px 16px}
+.lab .fq{font-size:18px;font-weight:600;margin:0 0 10px;line-height:1.35}
+.lab .fbtns{display:flex;gap:10px}
+.lab .fbtn{flex:1;max-width:160px;background:#000;color:#fff;border:1px solid var(--line-2);border-radius:12px;padding:11px 10px;font-size:15px;font-weight:600;cursor:pointer}
+.lab .fbtn:hover{border-color:var(--green)}
+.lab .fbtn.on{background:var(--green);border-color:var(--green);color:#04130a}
+.lab .next{display:block;margin:14px 0 0 auto;background:#fff;color:#000;border:0;border-radius:12px;padding:12px 26px;font-size:16px;font-weight:700;cursor:pointer}
+.lab .next:disabled{opacity:.3;cursor:not-allowed}
+
+@container (max-width:560px){
+  .lab .grid.stack .card{flex-direction:column}
+  .lab .grid.stack .imgwrap{border-radius:17px 17px 0 0;flex:none;width:100%}
+  .lab .grid.stack .info{flex:none}
+  .lab .fq{font-size:16px}
+  .lab .fbtn{padding:10px 6px;font-size:14px}
+  .lab .cat-title{font-size:22px}
+  .lab .qbanner{padding:12px 14px;border-left-width:5px}
+  .lab .qbanner .qt{font-size:19px}
+  .lab .grid{gap:10px}
+  .lab .info{padding:10px 10px 12px;gap:5px}
+  .lab .brand{font-size:15px}
+  .lab .rating{font-size:12px;gap:4px}
+  .lab .stars{font-size:12px;letter-spacing:0}
+  .lab .pop{font-size:11.5px}
+  .lab .price{font-size:18px}
+  .lab .ship{font-size:9.5px}
+  .lab .badge{font-size:10.5px;padding:4px 7px;top:7px;left:7px}
+  .lab .buy{padding:10px 6px;font-size:13px}
+}

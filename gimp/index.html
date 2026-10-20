@@ -1,0 +1,80 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>GIMP Redesign Tips · Project 2</title>
+<style>
+:root{--bg:#FAF8F3;--card:#FFFFFF;--ink:#1F2A44;--muted:#4A5568;--accent:#B4472F;--line:#DDD5C6;--code:#F1EDE4}
+@media (prefers-color-scheme:dark){:root{--bg:#161B26;--card:#1F2533;--ink:#EEF0F4;--muted:#B7BECB;--accent:#E8876F;--line:#343C4D;--code:#262D3D}}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font:17px/1.6 system-ui,-apple-system,"Segoe UI",Roboto,sans-serif}
+main{max-width:760px;margin:0 auto;padding:40px 16px 80px}
+.eyebrow{color:var(--accent);font-weight:700;letter-spacing:.12em;text-transform:uppercase;font-size:13px;margin:0}
+h1{font-family:Georgia,serif;font-size:36px;line-height:1.15;margin:6px 0 12px}
+h2{font-size:22px;margin:40px 0 10px}
+p,li{color:var(--muted)}
+b,strong{color:var(--ink)}
+ol,ul{padding-left:22px}
+li{margin:6px 0}
+.card{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:18px 20px;margin:16px 0}
+kbd{background:var(--code);border:1px solid var(--line);border-radius:4px;padding:1px 6px;font-size:14px;color:var(--ink)}
+a{color:var(--accent)}
+nav{font-size:15px;margin-bottom:28px}
+</style>
+</head>
+<body>
+<main>
+<nav><a href="../">← All Project 2 guides</a></nav>
+<p class="eyebrow">Project 2 · Redesign guide</p>
+<h1>Making your redesign in GIMP</h1>
+<p>GIMP is a free, Photoshop-like editor for Windows and Mac (download at <a href="https://www.gimp.org">gimp.org</a>). It's the best free option for <b>editing the photo itself</b>: removing a logo, cleaning up a background, or blending in a new element. Shortcuts show Windows <kbd>Ctrl</kbd>; on a Mac use <kbd>Cmd</kbd>.</p>
+
+<h2>1. Open and protect the original</h2>
+<ol>
+<li><b>File › Open</b> your Before screenshot. Note its size in pixels (shown in the title bar, or <b>Image › Image Properties</b>).</li>
+<li><b>Layer › Duplicate Layer</b>, and click the eye icon to hide the original in the Layers panel. Edit only the copy.</li>
+<li><b>Never use Image › Scale Image or Image › Canvas Size.</b> The After must stay the same size as the Before.</li>
+</ol>
+
+<h2>2. Remove something (logo, text, clutter)</h2>
+<ol>
+<li>Zoom in (<kbd>+</kbd> / <kbd>-</kbd>).</li>
+<li><b>Heal tool</b> (<kbd>H</kbd>): <kbd>Ctrl</kbd>+click a clean nearby area to set the source, then paint over the thing to remove. It blends texture and color.</li>
+<li><b>Clone tool</b> (<kbd>C</kbd>) works the same way but copies exactly; better for sharp patterns or edges.</li>
+<li>Use a soft brush, short strokes, and re-pick the source often so you don't create repeating patterns.</li>
+</ol>
+
+<h2>3. Cover an area with a matching color</h2>
+<ol>
+<li><b>Color Picker</b> (<kbd>O</kbd>): click the background next to the area. This sets the foreground color.</li>
+<li><b>Rectangle Select</b> (<kbd>R</kbd>): drag over the area.</li>
+<li><b>Edit › Fill with FG Color</b>, then <b>Select › None</b> (<kbd>Shift</kbd>+<kbd>Ctrl</kbd>+<kbd>A</kbd>).</li>
+</ol>
+
+<h2>4. Add text</h2>
+<ol>
+<li><b>Text tool</b> (<kbd>T</kbd>): click and type. Set the font, size, and color in Tool Options.</li>
+<li>GIMP uses fonts installed on your computer. To match a site's font, install it (or a close Google Fonts look-alike) first, then restart GIMP.</li>
+<li>Pick the color with the Color Picker so it matches the existing text exactly.</li>
+</ol>
+
+<h2>5. Add or replace an image element</h2>
+<ol>
+<li><b>File › Open as Layers</b> to bring in the new image as its own layer.</li>
+<li><b>Scale tool</b> (<kbd>Shift</kbd>+<kbd>S</kbd>) with the chain icon linked so it doesn't stretch; <b>Move tool</b> (<kbd>M</kbd>) to position it.</li>
+<li>To cut an object out of a photo, select it with <b>Free Select</b> (<kbd>F</kbd>) or <b>Fuzzy Select</b> (<kbd>U</kbd>), copy, and <b>Edit › Paste as › New Layer</b>.</li>
+</ol>
+
+<h2>6. Export</h2>
+<ol>
+<li><b>File › Export As</b> (<kbd>Shift</kbd>+<kbd>Ctrl</kbd>+<kbd>E</kbd>), name it with <b>.png</b>, and export. (Plain "Save" makes a GIMP .xcf file, which is useful for keeping layers but not for submitting.)</li>
+<li>Confirm the exported file's pixel size matches your Before.</li>
+</ol>
+
+<div class="card">
+<p><b>Final check: the flip test.</b> Open Before and After and flip between them. If anything changed besides your concept (size, crop, a smudge from the heal tool), fix it before submitting.</p>
+</div>
+</main>
+</body>
+</html>

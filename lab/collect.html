@@ -1,0 +1,226 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Study Collector · Project 2</title>
+<meta name="robots" content="noindex">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="lab.css">
+<style>
+:root{--bg:#FAF8F3;--card:#FFFFFF;--ink:#1F2A44;--muted:#4A5568;--accent:#B4472F;--line:#DDD5C6;--soft:#F1EDE4;--warn:#9A6200}
+@media (prefers-color-scheme:dark){:root{--bg:#161B26;--card:#1F2533;--ink:#EEF0F4;--muted:#B7BECB;--accent:#E8876F;--line:#343C4D;--soft:#262D3D;--warn:#E7B04B}}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.55 system-ui,-apple-system,"Segoe UI",Roboto,sans-serif}
+main{max-width:1100px;margin:0 auto;padding:36px 16px 80px}
+.eyebrow{color:var(--accent);font-weight:700;letter-spacing:.12em;text-transform:uppercase;font-size:13px;margin:0}
+h1{font-family:Georgia,serif;font-size:34px;line-height:1.15;margin:6px 0 12px}
+h2{font-size:20px;margin:30px 0 8px}
+p,li{color:var(--muted)}
+b{color:var(--ink)}
+ol li{margin:6px 0}
+code{font-family:"JetBrains Mono",ui-monospace,monospace;font-size:13px;background:var(--soft);padding:1px 6px;border-radius:5px}
+.drop{border:2px dashed var(--line);border-radius:14px;padding:34px 16px;text-align:center;background:var(--card);position:relative;cursor:pointer}
+.drop.drag,.drop:hover{border-color:var(--accent)}
+.drop input{position:absolute;inset:0;opacity:0;cursor:pointer}
+.drop b{font-size:17px}
+.tablewrap{overflow-x:auto;border:1px solid var(--line);border-radius:12px;background:var(--card);margin-top:12px}
+table{border-collapse:collapse;width:100%;font-size:14px}
+th,td{padding:8px 10px;border-bottom:1px solid var(--line);text-align:left;vertical-align:top}
+th{color:var(--muted);font-weight:600;white-space:nowrap}
+td.id{font-family:"JetBrains Mono",monospace;font-weight:600;white-space:nowrap}
+.flag{color:var(--warn);font-size:13px;display:block}
+.btn{font:inherit;font-weight:700;font-size:15px;background:var(--accent);color:#fff;border:0;border-radius:11px;padding:11px 18px;cursor:pointer;margin:14px 10px 0 0}
+.btn.ghost{background:transparent;color:var(--ink);border:1px solid var(--line);font-weight:600}
+.btn:disabled{opacity:.45;cursor:not-allowed}
+.pvbtn{font:inherit;font-size:13px;border:1px solid var(--line);background:var(--bg);color:var(--ink);border-radius:8px;padding:4px 9px;cursor:pointer;white-space:nowrap}
+.pvrow td{padding:0}
+.pvbox{padding:18px 16px;border-radius:0}
+.log{font-family:"JetBrains Mono",monospace;font-size:12.5px;color:var(--muted);white-space:pre-wrap;margin-top:10px}
+.callout{background:var(--soft);border-left:4px solid var(--accent);border-radius:8px;padding:12px 14px;margin:14px 0;color:var(--muted)}
+</style>
+</head>
+<body>
+<main>
+<p class="eyebrow">Project 2 · Instructor tool</p>
+<h1>Collect everyone's A/B tests</h1>
+<p>This page runs entirely in your browser; nothing is uploaded anywhere. It turns students' <code>…_abtest.zip</code> files into the study list for the study page, plus your Qualtrics files.</p>
+<ol>
+  <li>Download all submissions from Canvas (the single bulk zip is fine; zips inside zips are opened automatically).</li>
+  <li>Drop them below and check the table. Use <b>Preview</b> to look at any choice.</li>
+  <li>Click <b>Download upload bundle</b>. In your repo, upload the bundle's <code>lab</code> folder (Add file › Upload files, drag the folder). It replaces <code>lab/studies.js</code> and adds the images. <b>Don't upload <code>instructor_only</code></b>: it has student names.</li>
+  <li>The first time: import <code>instructor_only/end_survey.qsf</code> into Qualtrics, then paste that survey's link into <code>QUALTRICS_URL</code> in <code>lab/config.js</code>.</li>
+</ol>
+<div class="callout">Late submissions: drop <b>all</b> zips again (old and new) and re-upload. Each run rebuilds the full list. If you add or remove studies after data collection has started, change <code>version</code> in <code>lab/config.js</code>, and also re-import the .qsf or add the new fields to your Qualtrics survey.</div>
+
+<label class="drop" id="drop"><input type="file" id="files" accept=".zip,application/zip" multiple><b>Drop zip files here</b><br><span>or click to choose</span></label>
+<div class="log" id="log"></div>
+
+<div id="results" hidden>
+  <h2 id="count"></h2>
+  <div class="tablewrap"><table id="tbl"></table></div>
+  <button class="btn" id="bundle">Download upload bundle</button>
+  <button class="btn ghost" id="clear">Start over</button>
+</div>
+</main>
+
+<script src="lab.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
+<script>
+(function(){
+"use strict";
+const $ = id => document.getElementById(id), esc = LAB.esc;
+let STUDIES = []; // {study (from study.json), files:{comp,a,b: Blob}, urls:{...}, source, flags:[]}
+const log = t => { $("log").textContent += t + "\n"; };
+
+async function readZip(blob, source){
+  let zip; try{ zip = await JSZip.loadAsync(blob); }catch(e){ log(`✕ ${source}: not a readable zip`); return; }
+  const names = Object.keys(zip.files);
+  for(const n of names.filter(n=>/\.zip$/i.test(n) && !zip.files[n].dir)) await readZip(await zip.files[n].async("blob"), `${source} › ${n.split("/").pop()}`);
+  for(const n of names.filter(n=>/(^|\/)study\.json$/i.test(n))){
+    const dir = n.slice(0, n.length - "study.json".length);
+    let s; try{ s = JSON.parse(await zip.files[n].async("string")); }catch(e){ log(`✕ ${source}: study.json is unreadable`); continue; }
+    const files = {};
+    for(const [k, f] of [["comp", s.comp&&s.comp.img], ["a", s.client&&s.client.imgA], ["b", s.client&&s.client.imgB]]){
+      const entry = f && zip.files[dir + f];
+      if(entry) files[k] = await entry.async("blob");
+    }
+    if(!files.comp || !files.a || !files.b){ log(`✕ ${source}: missing image(s) for ${s.id}`); continue; }
+    STUDIES.push({study:s, files, source, flags:[]});
+    log(`✓ ${s.id}  ${s.name ? s.name.first+" "+s.name.last : ""}`);
+  }
+}
+
+function dedupe(){
+  // same ID + same person: keep newest. same ID + different person: rename with a number.
+  const byId = {};
+  STUDIES.sort((x,y)=>String(x.study.created).localeCompare(String(y.study.created)));
+  const keep = [];
+  for(const r of STUDIES){
+    const person = r.study.name ? (r.study.name.first+" "+r.study.name.last).toLowerCase() : "";
+    const prev = byId[r.study.id];
+    if(prev && prev.person===person){ keep[keep.indexOf(prev.r)] = r; r.flags.push("resubmitted, kept newest"); byId[r.study.id] = {r, person}; continue; }
+    if(prev){
+      const base = r.study.id; let k = 2; while(byId[base+k]) k++;
+      r.flags.push(`ID ${base} was taken, renamed to ${base+k}. Tell this student their columns are ${base+k}_…`);
+      r.study.id = base + k;
+    }
+    byId[r.study.id] = {r, person}; keep.push(r);
+  }
+  STUDIES = keep.sort((x,y)=>x.study.id.localeCompare(y.study.id));
+  STUDIES.forEach(r=>{ r.urls = {comp:URL.createObjectURL(r.files.comp), a:URL.createObjectURL(r.files.a), b:URL.createObjectURL(r.files.b)}; });
+}
+
+function runnerEntry(s){ // what the study page needs (no names, no survey answers)
+  return {id:s.id, category:s.category||"", question:s.question||"Which would you choose?", bg:s.bg||"white",
+    comp:{brand:s.comp.brand, img:`img/${s.id}_comp.jpg`},
+    client:{brandA:s.client.brandA, brandB:s.client.brandB||s.client.brandA, imgA:`img/${s.id}_a.jpg`, imgB:`img/${s.id}_b.jpg`},
+    price:s.price||{mode:"none"}, extras:s.extras||{},
+    layout:s.layout||{ratio:1, arrange:"side"}, track:!!s.track, followup:(s.followup&&s.followup.on) ? {on:true, text:s.followup.text||LAB.FOLLOWUP_DEFAULT} : {on:false}};
+}
+function studyCols(s){ const k = ["v","c","t"]; if(s.followup&&s.followup.on) k.push("r"); if(s.track) k.push("x"); return k; }
+function previewEntry(r){ const e = runnerEntry(r.study); e.comp.img = r.urls.comp; e.client.imgA = r.urls.a; e.client.imgB = r.urls.b; return e; }
+
+function priceText(p){ if(!p||p.mode==="none") return "none"; if(p.mode==="same") return `same $${p.value}`; return `comp $${p.comp} / A $${p.clientA} / B $${p.clientB}`; }
+function render(){
+  $("results").hidden = !STUDIES.length;
+  $("count").textContent = `${STUDIES.length} ${STUDIES.length===1?"study":"studies"}`;
+  $("tbl").innerHTML = `<tr><th>ID</th><th>Student</th><th>Competitor vs client</th><th>Question</th><th>Price</th><th>Extras</th><th>Columns</th><th></th></tr>` +
+    STUDIES.map((r,i)=>{ const s = r.study;
+      const brands = `${esc(s.comp.brand)} vs ${esc(s.client.brandA)}${s.client.brandB && s.client.brandB!==s.client.brandA ? ` → ${esc(s.client.brandB)}` : ""}`;
+      return `<tr><td class="id">${esc(s.id)}</td><td>${esc(s.name?s.name.first+" "+s.name.last:"")}${r.flags.map(f=>`<span class="flag">${esc(f)}</span>`).join("")}</td>
+        <td>${brands}${s.category?`<br><span style="color:var(--muted)">${esc(s.category)}</span>`:""}</td><td>${esc(s.question)}</td><td>${esc(priceText(s.price))}</td>
+        <td>${esc(Object.keys(s.extras||{}).join(", ")||"none")}</td>
+        <td>${esc(studyCols(s).map(k=>"_"+k).join(" "))}${s.followup&&s.followup.on?`<br><span style="color:var(--muted)">“${esc(s.followup.text)}”</span>`:""}</td>
+        <td><button class="pvbtn" data-i="${i}">Preview</button></td></tr>
+        <tr class="pvrow" id="pv${i}" hidden><td colspan="8"><div class="lab pvbox"><div class="stage"></div>
+          <div style="margin-top:10px"><button class="pvbtn" data-v="A">Version A</button> <button class="pvbtn" data-v="B">Version B</button></div></div></td></tr>`;
+    }).join("");
+  $("tbl").querySelectorAll("button[data-i]").forEach(b=>b.onclick=()=>{
+    const i = +b.dataset.i, row = $("pv"+i), stage = row.querySelector(".stage"), e = previewEntry(STUDIES[i]);
+    const draw = v => stage.innerHTML = LAB.trialHTML(e, v, true);
+    row.hidden = !row.hidden; if(!row.hidden) draw("A");
+    row.querySelectorAll("button[data-v]").forEach(x=>x.onclick=()=>draw(x.dataset.v));
+  });
+}
+
+/* ---------- outputs ---------- */
+// lab_ord comes first so it sits right after the demographic questions in the Qualtrics export
+const FIELDS_BASE = ["lab_ord","PROLIFIC_PID","STUDY_ID","SESSION_ID","lab_ver","lab_seed","lab_dev","lab_dur","lab_n"];
+function fieldList(){ return FIELDS_BASE.concat(...STUDIES.map(r=>studyCols(r.study).map(k=>`${r.study.id}_${k}`))); }
+function csvCell(v){ v = v==null ? "" : String(v); return /[",\n]/.test(v) ? `"${v.replace(/"/g,'""')}"` : v; }
+function submissionsCSV(){
+  const head = ["id","first","last","category","competitor","client_brand_A","client_brand_B","question","bg","price","extras","followup_question","tracks_hovers_clicks","demographics","demographics_other","why_effect","why_question","who_affected","who_question","source"];
+  const rows = STUDIES.map(r=>{ const s = r.study, sv = s.survey||{};
+    return [s.id, s.name&&s.name.first, s.name&&s.name.last, s.category, s.comp.brand, s.client.brandA, s.client.brandB, s.question, s.bg,
+      priceText(s.price), JSON.stringify(s.extras||{}), (s.followup&&s.followup.on)?s.followup.text:"", s.track?"yes":"no", (sv.demographics||[]).join("; "), sv.demographicsOther, sv.whyEffect, sv.whyQuestion, sv.whoAffected, sv.whoQuestion||sv.measureQuestion, r.source].map(csvCell).join(","); });
+  // tally of requested demographics
+  const tally = {}; STUDIES.forEach(r=>((r.study.survey||{}).demographics||[]).forEach(d=>tally[d]=(tally[d]||0)+1));
+  const tallyRows = ["", "demographic,times_requested"].concat(Object.entries(tally).sort((a,b)=>b[1]-a[1]).map(([d,n])=>`${d},${n}`));
+  return [head.join(",")].concat(rows, tallyRows).join("\n");
+}
+function makeQSF(fields){
+  const sid = "SV_cbtlEndSurvey01", now = new Date().toISOString().replace("T"," ").slice(0,19);
+  const el = (Element, PrimaryAttribute, Payload, SecondaryAttribute=null, TertiaryAttribute=null) => ({SurveyID:sid, Element, PrimaryAttribute, SecondaryAttribute, TertiaryAttribute, Payload});
+  const q = (id, tag, text, type, selector, extra) => el("SQ", id, Object.assign({
+    QuestionText:text, DataExportTag:tag, QuestionType:type, Selector:selector, Configuration:{QuestionDescriptionOption:"UseText"},
+    QuestionDescription:text, Validation:{Settings:{ForceResponse:"ON", ForceResponseType:"ON", Type:"None"}}, Language:[], DataVisibility:{Private:false, Hidden:false}, QuestionID:id
+  }, extra), text);
+  return {
+    SurveyEntry:{SurveyID:sid, SurveyName:"Consumer Behavior Test Lab – end survey", SurveyDescription:null, SurveyOwnerID:"", SurveyBrandID:"", DivisionID:null,
+      SurveyLanguage:"EN", SurveyActiveResponseSet:"RS_cbtl01", SurveyStatus:"Inactive", SurveyStartDate:"0000-00-00 00:00:00", SurveyExpirationDate:"0000-00-00 00:00:00",
+      SurveyCreationDate:now, CreatorID:"", LastModified:now, LastAccessed:"0000-00-00 00:00:00", LastActivated:"0000-00-00 00:00:00", Deleted:null},
+    SurveyElements:[
+      el("BL","Survey Blocks",[
+        {Type:"Default", Description:"Demographics", ID:"BL_cbtl01", BlockElements:[{Type:"Question",QuestionID:"QID1"},{Type:"Question",QuestionID:"QID2"}]},
+        {Type:"Trash", Description:"Trash / Unused Questions", ID:"BL_cbtl02", BlockElements:[]}
+      ]),
+      el("FL","Survey Flow",{Type:"Root", FlowID:"FL_1", Flow:[
+        {Type:"EmbeddedData", FlowID:"FL_2", EmbeddedData:fields.map(f=>({Description:f, Type:"Recipient", Field:f, VariableType:"String", DataVisibility:[], AnalyzeText:false}))},
+        {Type:"Block", ID:"BL_cbtl01", FlowID:"FL_3", Autofill:[]}
+      ], Properties:{Count:3}}),
+      el("SO","Survey Options",{BackButton:"false", SaveAndContinue:"true", SurveyProtection:"PublicSurvey", BallotBoxStuffingPrevention:"false", NoIndex:"Yes",
+        SecureResponseFiles:"true", SurveyExpiration:"None", SurveyTermination:"DefaultMessage", Header:"", Footer:"", ProgressBarDisplay:"None",
+        PartialData:"+1 week", ValidationMessage:"", PreviousButton:"", NextButton:" → ", SurveyTitle:"Consumer Behavior Test Lab", SurveyMetaDescription:"", NewScoring:1}),
+      el("SCO","Scoring",{ScoringCategories:[], ScoringCategoryGroups:[], ScoringSummaryCategory:null, ScoringSummaryAfterQuestions:0, ScoringSummaryAfterSurvey:0, DefaultScoringCategory:null, AutoScoringCategory:null}),
+      el("PROJ","CORE",{ProjectCategory:"CORE", SchemaVersion:"1.1.0"}, null, "1.1.0"),
+      el("STAT","Survey Statistics",{MobileCompatible:true, ID:"Survey Statistics"}),
+      el("QC","Survey Question Count",null,"2"),
+      el("RS","RS_cbtl01",null,"Default Response Set"),
+      q("QID1","age","What is your age (in years)?","TE","SL",{Validation:{Settings:{ForceResponse:"ON", ForceResponseType:"ON", Type:"ContentType", ContentType:"ValidNumber", ValidNumber:{Min:"18", Max:"100", NumDecimals:"0"}}}, DefaultChoices:false, SearchSource:{AllowFreeResponse:"false"}}),
+      q("QID2","gender","What is your gender?","MC","SAVR",{SubSelector:"TX",
+        Choices:{"1":{Display:"Man"},"2":{Display:"Woman"},"3":{Display:"Non-binary or another gender"},"4":{Display:"Prefer not to say"}},
+        ChoiceOrder:["1","2","3","4"], NextChoiceId:5, NextAnswerId:1})
+    ]
+  };
+}
+async function bundle(){
+  const zip = new JSZip(), lab = zip.folder("lab"), img = lab.folder("img"), inst = zip.folder("instructor_only");
+  const entries = STUDIES.map(r=>runnerEntry(r.study));
+  lab.file("studies.js", `// Generated by collect.html on ${new Date().toLocaleString()}. ${entries.length} studies.\nwindow.STUDIES = ${JSON.stringify(entries, null, 2)};\n`);
+  STUDIES.forEach(r=>{ const id = r.study.id; img.file(`${id}_comp.jpg`, r.files.comp); img.file(`${id}_a.jpg`, r.files.a); img.file(`${id}_b.jpg`, r.files.b); });
+  const fields = fieldList();
+  inst.file("submissions.csv", submissionsCSV());
+  inst.file("qualtrics_fields.txt", fields.join("\n"));
+  inst.file("end_survey.qsf", JSON.stringify(makeQSF(fields)));
+  const blob = await zip.generateAsync({type:"blob"});
+  const a = document.createElement("a"); a.href = URL.createObjectURL(blob); a.download = "lab_upload_bundle.zip"; document.body.appendChild(a); a.click(); a.remove();
+}
+
+async function handle(fileList){
+  for(const f of fileList) await readZip(f, f.name);
+  dedupe(); render();
+}
+const drop = $("drop");
+$("files").addEventListener("change", e=>handle([...e.target.files]));
+drop.addEventListener("dragover", e=>{ e.preventDefault(); drop.classList.add("drag"); });
+drop.addEventListener("dragleave", ()=>drop.classList.remove("drag"));
+drop.addEventListener("drop", e=>{ e.preventDefault(); drop.classList.remove("drag"); handle([...e.dataTransfer.files]); });
+$("bundle").onclick = async ()=>{ const b = $("bundle"); b.disabled = true; b.textContent = "Preparing…"; try{ await bundle(); b.textContent = "Download upload bundle"; }catch(e){ console.error(e); b.textContent = "Error, try again"; } b.disabled = false; };
+$("clear").onclick = ()=>{ STUDIES = []; $("log").textContent = ""; $("files").value = ""; render(); };
+})();
+</script>
+</body>
+</html>

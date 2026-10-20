@@ -1,0 +1,97 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Lovable Choice Page Tips · Project 2</title>
+<style>
+:root{--bg:#FAF8F3;--card:#FFFFFF;--ink:#1F2A44;--muted:#4A5568;--accent:#B4472F;--line:#DDD5C6;--code:#F1EDE4}
+@media (prefers-color-scheme:dark){:root{--bg:#161B26;--card:#1F2533;--ink:#EEF0F4;--muted:#B7BECB;--accent:#E8876F;--line:#343C4D;--code:#262D3D}}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font:17px/1.6 system-ui,-apple-system,"Segoe UI",Roboto,sans-serif}
+main{max-width:760px;margin:0 auto;padding:40px 16px 80px}
+.eyebrow{color:var(--accent);font-weight:700;letter-spacing:.12em;text-transform:uppercase;font-size:13px;margin:0}
+h1{font-family:Georgia,serif;font-size:36px;line-height:1.15;margin:6px 0 12px}
+h2{font-size:22px;margin:40px 0 10px}
+p,li{color:var(--muted)}
+b,strong{color:var(--ink)}
+ol,ul{padding-left:22px}
+li{margin:6px 0}
+.card{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:18px 20px;margin:16px 0}
+.prompt{background:var(--code);border-left:4px solid var(--accent);border-radius:8px;padding:14px 16px;font-family:ui-monospace,Menlo,Consolas,monospace;font-size:15px;white-space:pre-wrap;color:var(--ink)}
+kbd{background:var(--code);border:1px solid var(--line);border-radius:4px;padding:1px 6px;font-size:14px;color:var(--ink)}
+a{color:var(--accent)}
+nav{font-size:15px;margin-bottom:28px}
+</style>
+</head>
+<body>
+<main>
+<nav><a href="../">← All Project 2 guides</a></nav>
+<p class="eyebrow">Project 2 · Redesign guide</p>
+<h1>Building a choice page in Lovable</h1>
+<p>Instead of editing a screenshot, you can build your own realistic shopping page with <a href="https://lovable.dev">Lovable</a>, an AI tool that builds web pages from a description. The page shows <b>your client's product and the competitor side by side</b>, and the participant picks one and adds it to their cart.</p>
+<p>Then you <b>remix</b> (copy) the project and describe one change. Because Version B is an exact copy of Version A, everything stays identical except your change. That's what makes this a well-controlled test.</p>
+
+<div class="card">
+<p><b>Credits:</b> Lovable's free plan gives a limited number of AI messages. Gather everything first and write complete, specific prompts so you don't use them up on small fixes.</p>
+</div>
+
+<h2>1. Gather your materials</h2>
+<ul>
+<li>One product photo of each product (save the image itself from the retail site, not a screenshot of the whole page).</li>
+<li>Each product's name, brand, price, star rating, and review count, copied from the same retail site.</li>
+<li>For Version B: your new image, or the exact wording, badge, price, or layout change you plan to make.</li>
+</ul>
+
+<h2>2. Build Version A (the "before")</h2>
+<p>Start a new project, attach both product photos to the chat, and adapt this prompt:</p>
+<div class="prompt">Build a realistic online shopping page for a generic store called "[made-up store name]". It should look like a typical product comparison on a large retail website.
+
+Show two products side by side, each in a card of identical size and style:
+
+LEFT: [Competitor brand + product name]
+- Image: [first attached image]
+- Price: [$__]
+- Rating: [_._] stars ([____] reviews)
+
+RIGHT: [Your client's brand + product name]
+- Image: [second attached image]
+- Price: [$__]
+- Rating: [_._] stars ([____] reviews)
+
+Each card has an "Add to cart" button. When the participant clicks one, show a cart confirmation that says "Added to cart: [product name]" and disable both buttons so only one product can be chosen.
+
+Keep it simple: no header menus, ads, or extra products. It must look good on a phone screen.</div>
+<ul>
+<li>Use a <b>made-up store name</b>, not a real retailer's name or logo.</li>
+<li>Follow up until Version A looks realistic and neither product looks favored by the layout. <b>Then stop editing it.</b></li>
+<li>Click <b>Publish</b> to get a shareable link for Version A.</li>
+</ul>
+
+<h2>3. Remix to make Version B (the "after")</h2>
+<ol>
+<li>Open <b>Project settings › Project actions › Remix</b> (or the <b>⋯</b> menu on the project card in your dashboard). This makes a new copy you own.</li>
+<li>Name the copy "[Product] – Version B."</li>
+<li>In the copy, describe only your change:</li>
+</ol>
+<div class="prompt">Change ONLY the following on the [right / client's] product card: [describe the change exactly, e.g., "replace the product image with the attached image, at the same size and crop" or "add a small green 'Best for Sensitive Skin' badge above the product name"].
+
+Do not change anything else: keep the layout, card sizes, image sizes, the competitor card, prices, names, ratings, colors, fonts, button text, and the add-to-cart behavior exactly as they are.</div>
+<ul>
+<li>For a small text or color tweak, try Lovable's <b>Visual edits</b> (click an element and edit it directly). It changes only what you click and doesn't use an AI message.</li>
+<li>If Lovable changes something else too, restore the previous version from the version history and try a shorter, more specific prompt.</li>
+<li><b>Publish</b> Version B to get its link.</li>
+</ul>
+
+<h2>4. Check it</h2>
+<ul>
+<li><b>Flip test:</b> open both links in two tabs and flip between them, on a laptop and on your phone. Anything different besides your change? Fix it.</li>
+<li>Click each "Add to cart" button in both versions to make sure the confirmation works.</li>
+<li>Keep the products on the <b>same sides</b> in both versions.</li>
+</ul>
+
+<h2>5. Using it in the survey</h2>
+<p>The simplest approach: take a screenshot of each version and use those images in the survey's choice question. Or link participants to the page, and have them report the product they added to their cart back in the survey.</p>
+</main>
+</body>
+</html>

@@ -1,0 +1,161 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Build Your Own A/B Test Survey with AI</title>
+<style>
+:root{--bg:#FFFFFF;--ink:#111827;--muted:#4B5563;--accent:#1D4ED8;--line:#D1D5DB;--soft:#F3F4F6;--code:#F3F4F6}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font:17px/1.6 Arial,Helvetica,sans-serif}
+main{max-width:820px;margin:0 auto;padding:32px 16px 90px}
+h1{font-size:32px;line-height:1.2;margin:0 0 12px}
+h2{font-size:24px;line-height:1.25;margin:44px 0 10px;padding-top:22px;border-top:1px solid var(--line)}
+h3{font-size:18px;margin:24px 0 6px}
+p,li{color:#1F2937}
+.lead{font-size:18px;color:var(--muted)}
+a{color:var(--accent)}
+ul,ol{padding-left:24px}
+li{margin:6px 0}
+code{font-family:Consolas,Menlo,monospace;font-size:15px;background:var(--code);padding:1px 6px;border-radius:4px}
+.box{background:var(--soft);border-radius:12px;padding:16px 18px;margin:16px 0}
+.box p:first-child,.box ul:first-child{margin-top:0}
+.box p:last-child,.box ul:last-child{margin-bottom:0}
+.prompt{position:relative;background:#0F172A;color:#E5E7EB;border-radius:12px;padding:18px 18px 16px;margin:12px 0 18px;font-family:Consolas,Menlo,monospace;font-size:14.5px;line-height:1.55;white-space:pre-wrap;overflow-wrap:anywhere}
+.copy{position:absolute;top:10px;right:10px;font:600 13px Arial,sans-serif;background:#fff;color:#0F172A;border:0;border-radius:7px;padding:6px 10px;cursor:pointer}
+.url{font-family:Consolas,Menlo,monospace;font-size:15px;background:var(--soft);border-radius:10px;padding:14px 16px;overflow-x:auto;white-space:nowrap}
+.url .base{color:#6B7280}.url .q{color:#B91C1C;font-weight:700}.url .k{color:#1D4ED8;font-weight:700}.url .v{color:#15803D;font-weight:700}.url .a{color:#B91C1C;font-weight:700}
+table{border-collapse:collapse;width:100%;font-size:15.5px;margin:10px 0}
+th,td{border-bottom:1px solid var(--line);padding:8px 8px;text-align:left;vertical-align:top}
+th{background:var(--soft)}
+.steps{counter-reset:s;list-style:none;padding:0}
+.steps>li{counter-increment:s;position:relative;padding-left:44px;margin:16px 0}
+.steps>li::before{content:counter(s);position:absolute;left:0;top:0;width:30px;height:30px;border-radius:50%;background:var(--accent);color:#fff;font-weight:700;display:flex;align-items:center;justify-content:center;font-size:15px}
+.ec{border:2px solid #CA8A04;background:#FEFCE8;border-radius:14px;padding:18px 20px;margin:16px 0}
+.ec h3{margin-top:0}
+.submit{background:#B91C1C;color:#fff;border-radius:16px;padding:24px 24px 26px;margin:20px 0}
+.submit h2{color:#fff;border:0;margin:0 0 10px;padding:0}
+.submit p,.submit li{color:#fff;font-size:18px}
+@media (max-width:600px){h1{font-size:27px} h2{font-size:21px} .url{font-size:13px}}
+</style>
+</head>
+<body>
+<main>
+<h1>Build your own A/B test survey with AI</h1>
+<p class="lead">You've set up your A/B test for the class study. Now you'll build a similar survey yourself, from scratch, using an AI assistant such as ChatGPT, Copilot, or Claude. You don't need any coding experience. You'll describe what you want, test it, and improve it.</p>
+<div class="box">
+<p><b>What you'll learn:</b></p>
+<ul>
+  <li>How to use AI to build a working online survey and fix it when something's off</li>
+  <li>How <b>random assignment</b> creates a fair A/B test</li>
+  <li>How <b>query parameters</b> pass data from one web page to another</li>
+  <li>How a survey can quietly record behavior like <b>clicks, hovers, and mouse movements</b></li>
+</ul>
+</div>
+
+<h2>Three ideas to understand first</h2>
+
+<h3>1. Random assignment</h3>
+<p>In an A/B test, each participant is randomly assigned to see either Version A (your original, the "control") or Version B (your redesign). Because chance decides, the two groups are alike on average in age, taste, mood, everything. So if more people in group B choose your product, the redesign is the likely cause.</p>
+<p>In code, this is often one line: <code>Math.random() &lt; 0.5 ? "A" : "B"</code>, which works like a coin flip. Good surveys also randomize <b>which side</b> each product appears on, since some people tend to pick whatever is on the left.</p>
+
+<h3>2. Query parameters</h3>
+<p>A query parameter is information added to the end of a web address. Everything after the <code>?</code> is a list of <b>name=value</b> pairs, separated by <code>&amp;</code>:</p>
+<div class="url"><span class="base">https://example.qualtrics.com/survey</span><span class="q">?</span><span class="k">version</span>=<span class="v">B</span><span class="a">&amp;</span><span class="k">choice</span>=<span class="v">1</span><span class="a">&amp;</span><span class="k">time</span>=<span class="v">4.2</span><span class="a">&amp;</span><span class="k">hovers</span>=<span class="v">3</span></div>
+<p>This is how the class study works: after the choices, the study page sends everyone to Qualtrics with their results in the address. Qualtrics reads each name (set up as "Embedded Data") and saves its value. Your own survey can work the same way. A page can also <b>read</b> parameters, for example <code>?v=B</code> to force Version B while you test.</p>
+
+<h3>3. Tracking behavior</h3>
+<p>Web pages can record more than the final answer. Each of these can be stored as one more value:</p>
+<table>
+<tr><th>What</th><th>Example measure</th><th>Why it might help</th></tr>
+<tr><td>Decision time</td><td>Seconds from screen load to choice</td><td>Quick choices suggest the decision was easy or automatic</td></tr>
+<tr><td>Hovers</td><td>Times the mouse moved onto each product</td><td>Shows which product drew attention</td></tr>
+<tr><td>Clicks</td><td>Clicks anywhere other than the choice buttons</td><td>Hesitation, or trying to inspect a product</td></tr>
+<tr><td>Mouse movement</td><td>Seconds spent over each product, or total distance moved</td><td>Finer-grained attention and indecision</td></tr>
+<tr><td>Device</td><td>Phone or computer</td><td>Images look smaller on phones, and phones can't hover</td></tr>
+</table>
+<p>Keep it to <b>simple summaries</b> (a count or a number of seconds), not every single movement, which creates huge, messy data. And only track behavior on your own survey page, never anything personal.</p>
+
+<h2>Build it, step by step</h2>
+<ol class="steps">
+<li><b>Gather your files.</b> Make a folder with your three images, renamed to <code>competitor.jpg</code>, <code>original.jpg</code>, and <code>redesign.jpg</code> (or <code>.png</code>; just tell the AI which).</li>
+<li><b>Open an AI assistant</b> (ChatGPT, Copilot, Claude, or similar) and paste the starter prompt below. Fill in the parts in [brackets] first.</li>
+<li><b>Save the code.</b> Copy the AI's code into a plain-text file named <code>index.html</code> in the same folder as your images. (On Windows use Notepad; on Mac, TextEdit set to Format › Make Plain Text.) Some assistants offer a download button instead.</li>
+<li><b>Open it.</b> Double-click <code>index.html</code> to open it in your browser, then take your own survey.</li>
+<li><b>Test and improve</b> using the checklist below. Tell the AI exactly what's wrong and ask for the full updated file each time.</li>
+<li><b>Put it online</b> so others can open it (see "Share your page").</li>
+</ol>
+
+<h3>Starter prompt</h3>
+<div class="prompt" id="p1">Build a single-file web page (HTML, CSS, and JavaScript all in one file, with no frameworks or server) for a short online consumer survey that runs an A/B test. Three images are in the same folder as the page: competitor.jpg, original.jpg, and redesign.jpg.
+
+Flow:
+1. Welcome screen: one sentence saying this is a short shopping study, and a Start button.
+2. Randomly assign each participant to Version A (original.jpg) or Version B (redesign.jpg), 50/50. For testing, let me force a version by adding ?v=A or ?v=B to the page address.
+3. Choice screen: the question "Which would you choose?" above two product cards side by side, one for the competitor ([competitor brand]) and one for my client's product ([client brand], using original.jpg or redesign.jpg depending on the version). Both images should be shown in same-size boxes. Randomly choose which product appears on the left. Each card has an "Add to Cart" button.
+4. Record: version (A or B), choice (1 = my client's product, 0 = competitor), decision time in seconds, which side my client's product was on, and the number of times the mouse hovered over each product.
+5. Follow-up questions, one screen: age (number), [another demographic, e.g., gender], [a question about WHY the redesign might work, e.g., "How high-quality does [client brand] seem? 1-7"], and [a question about WHO might be most affected, e.g., "How familiar are you with [client brand]? 1-7"].
+6. End screen: thank the participant and show all recorded data as query parameters, like ?version=B&amp;choice=1&amp;time=4.2&amp;hover_mine=2&amp;hover_comp=1&amp;age=34 (plus the other answers).
+
+Make it look like a clean, modern online store and work well on phones.</div>
+
+<h3>What to add (required)</h3>
+<ul>
+  <li><b>Demographics:</b> at least age, plus any others useful for your test (gender, student or not, etc.).</li>
+  <li><b>A "why" question or two:</b> something that could explain whether your redesign worked, like perceived quality, trust, or how appealing or noticeable it was.</li>
+  <li><b>A "who" question:</b> something about the people your redesign might affect most, like brand familiarity or how often they buy this product.</li>
+  <li><b>At least one behavior parameter:</b> clicks or hovers (the starter prompt includes hovers). Try adding another, like seconds the mouse spent over each product.</li>
+</ul>
+
+<h3>Useful follow-up prompts</h3>
+<div class="prompt" id="p2">Also track the number of clicks anywhere on the choice screen other than the two Add to Cart buttons, and add it to the query parameters as extra_clicks.</div>
+<div class="prompt" id="p3">Also track the total seconds the mouse spends over each product card (time_mine and time_comp, rounded to 0.1 seconds). On phones, where there's no mouse, record "na".</div>
+<div class="prompt" id="p4">When I test on my phone the two product images are different heights. Make both image boxes exactly the same size on every screen width, with the images fully visible inside them. Give me the full updated file.</div>
+
+<h2>Test it like a researcher</h2>
+<ul>
+  <li><b>Both versions work:</b> open the page with <code>?v=A</code> and with <code>?v=B</code> at the end of the address. Does the right image appear?</li>
+  <li><b>Randomization works:</b> reload the page without <code>?v=</code> about 10 times. You should see both versions, and your product on both sides, roughly half the time each.</li>
+  <li><b>The data is right:</b> make a choice you know, hover a set number of times, and check the end screen. Do the values match what you did?</li>
+  <li><b>Well-controlled:</b> are A and B identical except for your redesign (image size, position, text)?</li>
+  <li><b>Phone check:</b> open it on your phone. Is everything readable and clickable?</li>
+</ul>
+<p>When something's off, describe exactly what you saw and what you expected ("On Version B the image is cut off at the bottom; it should fit fully in the box"). Say "give me the full updated file" so you don't have to merge pieces.</p>
+
+<h2>Share your page</h2>
+<p>A file on your computer only works for you. To share it, put the folder (your <code>index.html</code> plus the images) online for free:</p>
+<ul>
+  <li><b>GitHub Pages:</b> make a free GitHub account, create a public repository, upload your files, then turn on Settings › Pages (Deploy from a branch, main, root). Your link will be <code>yourname.github.io/repository-name</code>.</li>
+  <li><b>Netlify Drop</b> (<a href="https://app.netlify.com/drop">app.netlify.com/drop</a>): drag your folder onto the page to get a link. Sign in with a free account first so your site stays up.</li>
+</ul>
+
+<div class="ec">
+<h3>Extra credit: save the data somewhere</h3>
+<p>Right now your data only shows on the end screen. For extra credit, make it save automatically. Pick one:</p>
+<ul>
+  <li><b>Qualtrics (most reliable):</b> make a one-question Qualtrics survey ("Thanks! Click Next to finish"). In its Survey Flow, add an Embedded Data element at the top with the exact names of your parameters (version, choice, time, …). Then ask the AI: <i>"At the end, redirect to [your Qualtrics survey link] with all the data added as query parameters."</i> Take your survey once and check that the values show up in Qualtrics' Data &amp; Analysis tab.</li>
+  <li><b>Google Sheets:</b> ask the AI: <i>"Show me, step by step, how to save each participant's data as a new row in a Google Sheet using a Google Apps Script web app, and update my page to send the data there when the survey ends."</i> Follow its steps for deploying the script.</li>
+  <li><b>A free back-end</b> such as Firebase or Supabase: possible, but more setup. If you try it, collect anonymous answers only, and never paste passwords or secret keys into your page.</li>
+</ul>
+<p>Whatever you choose: never collect names, emails, or other personal information.</p>
+</div>
+
+<div class="submit">
+<h2>Submit on Canvas</h2>
+<ul>
+  <li>The <b>link</b> to your survey page (online, not a file on your computer)</li>
+  <li>A <b>link to or copy of your AI conversation</b>, showing the prompts you used</li>
+  <li>A <b>screenshot of your end screen</b> showing the recorded data</li>
+  <li>2–3 sentences: what worked, what you changed after testing, and (for extra credit) where your data was saved</li>
+</ul>
+</div>
+</main>
+<script>
+document.querySelectorAll(".prompt").forEach(el=>{
+  const b = document.createElement("button"); b.className = "copy"; b.type = "button"; b.textContent = "Copy";
+  b.onclick = async ()=>{ const t = el.childNodes[0].textContent; try{ await navigator.clipboard.writeText(t); b.textContent = "Copied ✓"; }catch(e){ b.textContent = "Select & copy"; } setTimeout(()=>b.textContent="Copy",1600); };
+  el.appendChild(b);
+});
+</script>
+</body>
+</html>

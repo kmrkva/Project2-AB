@@ -1,0 +1,81 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>AI Image Editing Tips · Project 2</title>
+<style>
+:root{--bg:#FAF8F3;--card:#FFFFFF;--ink:#1F2A44;--muted:#4A5568;--accent:#B4472F;--line:#DDD5C6;--code:#F1EDE4}
+@media (prefers-color-scheme:dark){:root{--bg:#161B26;--card:#1F2533;--ink:#EEF0F4;--muted:#B7BECB;--accent:#E8876F;--line:#343C4D;--code:#262D3D}}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font:17px/1.6 system-ui,-apple-system,"Segoe UI",Roboto,sans-serif}
+main{max-width:760px;margin:0 auto;padding:40px 16px 80px}
+.eyebrow{color:var(--accent);font-weight:700;letter-spacing:.12em;text-transform:uppercase;font-size:13px;margin:0}
+h1{font-family:Georgia,serif;font-size:36px;line-height:1.15;margin:6px 0 12px}
+h2{font-size:22px;margin:40px 0 10px}
+p,li{color:var(--muted)}
+b,strong{color:var(--ink)}
+ol,ul{padding-left:22px}
+li{margin:6px 0}
+.card{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:18px 20px;margin:16px 0}
+.prompt{background:var(--code);border-left:4px solid var(--accent);border-radius:8px;padding:14px 16px;font-family:ui-monospace,Menlo,Consolas,monospace;font-size:15px;white-space:pre-wrap;color:var(--ink)}
+kbd{background:var(--code);border:1px solid var(--line);border-radius:4px;padding:1px 6px;font-size:14px}
+a{color:var(--accent)}
+nav{font-size:15px;margin-bottom:28px}
+</style>
+</head>
+<body>
+<main>
+<nav><a href="../">← All Project 2 guides</a></nav>
+<p class="eyebrow">Project 2 · Redesign guide</p>
+<h1>Editing your product image with AI</h1>
+<p>AI image tools (for example ChatGPT, Gemini, or Adobe Firefly / Photoshop's Generative Fill) are great for changing a <b>scene, background, or visual element</b>. Their weakness is that they tend to quietly change things you didn't ask for. Your job is to keep the A/B test well-controlled: <b>only your concept should change.</b></p>
+
+<h2>Workflow</h2>
+<ol>
+<li><b>Crop just the product photo</b> out of your Before screenshot (not the whole web page). AI tools do much better on a single image.</li>
+<li><b>Upload it and ask for one change</b> using the prompt template below.</li>
+<li><b>Check the result carefully</b> against the original (see "What to check").</li>
+<li><b>Put the edited photo back into the retail layout</b> in Canva, Figma, GIMP, or PowerPoint, at the same size and position as the original photo, so the price, title, and ratings stay identical.</li>
+</ol>
+
+<h2>Prompt template</h2>
+<div class="prompt">Edit this product image. Change ONLY the following: [describe your one change].
+
+Keep everything else exactly the same:
+- the same product, with the same shape, color, size, and details
+- the same camera angle and framing
+- the same image dimensions and aspect ratio
+- the same lighting and photo style
+- do not add, remove, or change any text or logos (unless that is the change above)</div>
+
+<h2>Example prompts</h2>
+<div class="card">
+<p><b>Product in context</b> (like the Christmas tree example):</p>
+<div class="prompt">Edit this product image. Change ONLY the background: place the tree in a cozy, decorated living room at Christmas. Keep the tree itself exactly the same (same shape, height, branches, color, and angle). Keep the same image dimensions and aspect ratio.</div>
+</div>
+<div class="card">
+<p><b>Removing branding</b> (like the sweatshirt example):</p>
+<div class="prompt">Edit this product image. Remove ONLY the large logo printed on the front of the sweatshirt, leaving plain fabric that matches the surrounding color and texture. Keep everything else exactly the same: the sweatshirt's color, fit, folds, model, pose, background, and image dimensions.</div>
+</div>
+
+<h2>What to check</h2>
+<ul>
+<li><b>The product itself:</b> AI often changes its color, shape, proportions, or small details. Compare side by side.</li>
+<li><b>Text and logos:</b> AI frequently garbles lettering. If your change involves text, have AI make the visual change only, then add the text yourself in an image editor.</li>
+<li><b>Size and shape of the image:</b> the output may come back at a different size or aspect ratio. Crop (don't stretch) to match the original's proportions, then place it into the layout at the original size.</li>
+<li><b>Style mismatch:</b> if the result looks far glossier than a normal product listing, ask for "a realistic e-commerce product photo style."</li>
+</ul>
+
+<h2>If it keeps changing too much</h2>
+<ul>
+<li>Use a tool's <b>select-an-area</b> editing (Generative Fill in Photoshop, or highlighting a region in tools that allow it) so only that part is regenerated.</li>
+<li>Start a fresh chat and ask again with a shorter, more specific prompt. Long conversations drift.</li>
+<li>Generate only the new element (e.g., a background scene), then combine it with the original product photo yourself in an editor.</li>
+</ul>
+
+<h2>Final check: the flip test</h2>
+<p>Put your Before and After screenshots side by side (or flip between them). If you notice <b>any difference besides your concept</b>, fix it before submitting.</p>
+</main>
+</body>
+</html>

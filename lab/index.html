@@ -1,0 +1,211 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Consumer Behavior Test Lab</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="lab.css">
+<style>
+html,body{margin:0;background:#0a0a0a;-webkit-text-size-adjust:100%}
+body{min-height:100vh}
+.wrap{max-width:1040px;margin:0 auto;padding:28px 16px 64px}
+.topbar{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:22px;flex-wrap:wrap;row-gap:8px}
+.logo{font-weight:700;letter-spacing:.16em;font-size:15px;text-transform:uppercase}
+.logo .dot{color:var(--green)}
+.progress{font-family:var(--mono);font-size:12px;color:var(--dim);display:flex;align-items:center;gap:10px}
+.bar{width:120px;height:4px;background:var(--line);border-radius:4px;overflow:hidden}
+.bar>i{display:block;height:100%;background:var(--green)}
+.screen{max-width:680px;margin:0 auto}
+.screen h1{font-size:30px;margin:8px 0 14px}
+.screen p,.screen li{color:#cbd5e1;line-height:1.6;font-size:16px}
+.note{background:var(--panel);border:1px solid var(--line-2);border-radius:14px;padding:14px 18px;margin:18px 0;color:#cbd5e1;line-height:1.55}
+.note.test{border-color:#fbbf24;background:rgba(251,191,36,.08)}
+.btn{display:inline-flex;align-items:center;justify-content:center;background:#fff;color:#000;border:0;border-radius:12px;padding:14px 26px;font-size:16px;font-weight:600;cursor:pointer;margin:4px 8px 4px 0;text-decoration:none}
+.btn.ghost{background:transparent;color:var(--text);border:1px solid var(--line-2)}
+table.res{border-collapse:collapse;width:100%;font-family:var(--mono);font-size:13px;margin:12px 0}
+table.res td,table.res th{border-bottom:1px solid var(--line);padding:7px 8px;text-align:left;color:#cbd5e1;vertical-align:top}
+table.res th{color:var(--muted);font-weight:600}
+.url{font-family:var(--mono);font-size:11.5px;word-break:break-all;color:var(--muted)}
+.footnote{text-align:center;font-family:var(--mono);font-size:11px;color:#475569;margin-top:36px}
+@media (max-width:600px){ .wrap{padding:18px 12px 48px} .logo{font-size:11.5px;letter-spacing:.1em} .bar{width:70px} .screen h1{font-size:24px} }
+</style>
+</head>
+<body class="lab">
+<div class="wrap">
+  <div class="topbar"><div class="logo" id="logo"></div><div class="progress" id="progress"></div></div>
+  <main id="app" class="stage"></main>
+  <div class="footnote">Research study. Nothing will actually be purchased.</div>
+</div>
+<script src="config.js"></script>
+<script src="studies.js"></script>
+<script src="lab.js"></script>
+<script>
+(function(){
+"use strict";
+const C = window.LAB_CONFIG || {}, ALL = window.STUDIES || [], esc = LAB.esc;
+const qs = new URLSearchParams(location.search);
+const ONLY = (qs.get("only")||"").trim().toLowerCase();
+const FORCE_V = (qs.get("v")||"").toUpperCase();
+const DEBUG = qs.get("debug")==="1";
+const RESERVED = ["only","v","debug","seed","reset"];
+const KEY = "cbtl_" + (C.version||"1") + (ONLY ? "_only_"+ONLY : "");
+const app = document.getElementById("app");
+document.getElementById("logo").innerHTML = '<span class="dot">● </span>' + esc(C.title || "Consumer Behavior Test Lab");
+document.title = C.title || document.title;
+
+/* ---------- seeded randomization ---------- */
+function mulberry32(a){return function(){a|=0;a=a+0x6D2B79F5|0;let t=Math.imul(a^a>>>15,1|a);t=t+Math.imul(t^t>>>7,61|t)^t;return((t^t>>>14)>>>0)/4294967296;};}
+function shuffle(arr,rng){const a=arr.slice();for(let i=a.length-1;i>0;i--){const j=Math.floor(rng()*(i+1));[a[i],a[j]]=[a[j],a[i]];}return a;}
+function balanced(n, x, y, rng){ // half x, half y (odd n: extra goes to a random one), shuffled
+  const extra = rng()<.5 ? x : y, half = Math.floor(n/2), arr = [];
+  for(let i=0;i<half;i++){ arr.push(x); arr.push(y); }
+  if(n%2) arr.push(extra);
+  return shuffle(arr, rng);
+}
+
+const studies = ONLY ? ALL.filter(s=>s.id===ONLY) : ALL;
+const isTouch = matchMedia("(pointer:coarse)").matches;
+
+function fresh(){
+  let seed = parseInt(qs.get("seed"),10);
+  if(!(seed>0)) seed = 1 + Math.floor(Math.random()*1e6);
+  const rng = mulberry32(seed*2654435761>>>0);
+  const order = shuffle(studies.map(s=>s.id), rng);
+  const vers = balanced(order.length, "A", "B", rng), sides = balanced(order.length, "L", "R", rng);
+  const ver = {}, side = {};
+  order.forEach((id,i)=>{ ver[id] = (FORCE_V==="A"||FORCE_V==="B") ? FORCE_V : vers[i]; side[id] = sides[i]; });
+  const pass = {}; qs.forEach((v,k)=>{ if(!RESERVED.includes(k)) pass[k]=v; });
+  return {seed, order, ver, side, step:0, res:{}, t0:Date.now(), pass};
+}
+function load(){
+  if(qs.get("reset")==="1"){ try{sessionStorage.removeItem(KEY);}catch(e){} }
+  try{ const s = JSON.parse(sessionStorage.getItem(KEY)); if(s && s.order && s.order.length===studies.length) return s; }catch(e){}
+  return fresh();
+}
+let S = load();
+function save(){ try{ sessionStorage.setItem(KEY, JSON.stringify(S)); }catch(e){} }
+const byId = id => studies.find(s=>s.id===id);
+
+// keep the back button from undoing choices
+history.pushState(null,"",location.href);
+addEventListener("popstate",()=>history.pushState(null,"",location.href));
+
+function setProgress(){
+  const n = S.order.length, el = document.getElementById("progress");
+  if(S.step>=1 && S.step<=n) el.innerHTML = `<span>${S.step} / ${n}</span><span class="bar"><i style="width:${(S.step-1)/n*100}%"></i></span>`;
+  else el.innerHTML = "";
+}
+function next(){ S.step++; save(); render(); scrollTo(0,0); }
+function render(){
+  setProgress();
+  if(!studies.length) return renderEmpty();
+  if(S.step===0) return renderWelcome();
+  if(S.step<=S.order.length) return renderTrial();
+  return renderEnd();
+}
+
+function renderEmpty(){
+  app.innerHTML = `<div class="screen"><h1>${ONLY?"Study not found":"No studies yet"}</h1>
+    <p>${ONLY?`There's no study with the ID <b>${esc(ONLY)}</b> on the site yet. If you just submitted it, it appears once your instructor adds it.`:"The study list is empty."}</p></div>`;
+}
+
+function renderWelcome(){
+  const n = S.order.length, mins = Math.max(1, Math.round(n*7/60));
+  app.innerHTML = `<div class="screen">
+    ${ONLY?`<div class="note test"><b>Test mode:</b> showing only study <b>${esc(ONLY)}</b>, Version ${esc(S.ver[ONLY])}${FORCE_V?" (forced)":" (random)"}. Your answers here are not saved anywhere.</div>`:""}
+    <h1>Welcome</h1>
+    <p>You'll see ${n===1?"a pair":`${n} pairs`} of products, like you might see when shopping online.</p>
+    <p>For each pair, click <b>Add to Cart</b> on the one you would choose. Nothing will actually be purchased. Go with your first instinct; each one takes just a few seconds.</p>
+    ${n>1?`<p>This part takes about ${mins} minute${mins>1?"s":""}. Please don't use your browser's back button.</p>`:""}
+    <button class="btn" id="go">Start</button>
+  </div>`;
+  document.getElementById("go").onclick = ()=>{ S.t0 = Date.now(); next(); };
+}
+
+/* ---------- one choice ---------- */
+let tracker = null;
+document.addEventListener("click", e=>{ if(tracker && !e.target.closest(".buy,.fbtn,.next")) tracker.clicks++; }, true);
+
+function preload(id){ const s = byId(id); if(!s) return; const L = LAB.listings(s, S.ver[id]); [L.client.img, L.comp.img].forEach(src=>{ if(src){ const i=new Image(); i.src=src; } }); }
+
+function renderTrial(){
+  const id = S.order[S.step-1], s = byId(id), clientLeft = S.side[id]==="L";
+  app.innerHTML = LAB.trialHTML(s, S.ver[id], clientLeft);
+  preload(S.order[S.step]);
+  const t = tracker = {id, start:performance.now(), hov:{client:0, comp:0}, clicks:0, done:false};
+  app.querySelectorAll(".card").forEach(card=>{
+    const who = card.dataset.who;
+    card.addEventListener("pointerenter", e=>{ if(e.pointerType!=="touch") t.hov[who]++; });
+    card.addEventListener("pointerdown", e=>{ if(e.pointerType==="touch" && !e.target.closest(".buy")) t.hov[who]++; });
+  });
+  const fu = LAB.hasFollowup(s), buys = [...app.querySelectorAll(".buy")];
+  const finish = ()=>{
+    if(t.done) return; t.done = true;
+    const r = { c: t.choice==="client" ? 1 : 0, t: (t.rt/1000).toFixed(1) };
+    if(s.track) r.x = `${S.side[id]}.${t.hov.client}.${t.hov.comp}.${t.clicks}`;
+    if(fu) r.r = t.r;
+    S.res[id] = r; tracker = null;
+    app.querySelectorAll("button").forEach(x=>x.disabled=true);
+    save(); setTimeout(next, fu ? 150 : 350);
+  };
+  const nextBtn = app.querySelector(".next");
+  const ready = ()=>{ if(nextBtn) nextBtn.disabled = !(t.choice && t.r!=null); };
+  buys.forEach(b=>b.addEventListener("click", ()=>{
+    if(t.done) return;
+    t.choice = b.dataset.who; t.rt = performance.now() - t.start;   // last choice made counts
+    buys.forEach(x=>{ x.closest(".card").classList.toggle("chosen", x===b); x.textContent = x===b ? "Added ✓" : "Add to Cart"; });
+    if(fu) ready(); else finish();
+  }));
+  if(fu){
+    app.querySelectorAll(".fbtn").forEach(f=>f.addEventListener("click", ()=>{
+      if(t.done) return; t.r = Number(f.dataset.r);
+      app.querySelectorAll(".fbtn").forEach(x=>x.classList.toggle("on", x===f)); ready();
+    }));
+    nextBtn.addEventListener("click", ()=>{ if(t.choice && t.r!=null) finish(); });
+  }
+}
+
+/* ---------- end: send everything to Qualtrics ---------- */
+function params(){
+  const p = new URLSearchParams();
+  Object.entries(S.pass).forEach(([k,v])=>p.set(k,v));
+  p.set("lab_ver", C.version||""); p.set("lab_seed", S.seed); p.set("lab_dev", isTouch?"m":"d");
+  p.set("lab_dur", Math.round((Date.now()-S.t0)/1000)); p.set("lab_n", Object.keys(S.res).length);
+  p.set("lab_ord", S.order.join("-"));
+  S.order.forEach(id=>{ const r = S.res[id]; if(!r) return;
+    p.set(id+"_v", S.ver[id]); p.set(id+"_c", r.c); p.set(id+"_t", r.t);
+    if(r.x!=null) p.set(id+"_x", r.x);
+    if(r.r!=null) p.set(id+"_r", r.r); });
+  return p;
+}
+function renderEnd(){
+  const p = params(), base = C.QUALTRICS_URL || "";
+  const placeholder = !base || /YOUR_UNIVERSITY|SV_X{5,}/.test(base);
+  let url = base; try{ const u = new URL(base); p.forEach((v,k)=>u.searchParams.set(k,v)); url = u.toString(); }catch(e){}
+  if(!ONLY && !DEBUG && !placeholder){
+    try{ sessionStorage.removeItem(KEY); }catch(e){}
+    app.innerHTML = `<div class="screen"><h1>Thanks!</h1><p>Saving your responses and taking you to the last few questions…</p>
+      <p><a href="${esc(url)}" style="color:var(--green-2)">Click here if you are not taken there automatically.</a></p></div>`;
+    setTimeout(()=>location.replace(url), 500);
+    return;
+  }
+  const rows = S.order.map(id=>{ const r=S.res[id]||{};
+    return `<tr><td>${esc(id)}</td><td>${esc(S.ver[id])}</td><td>${r.c===1?"1 (client's product)":r.c===0?"0 (competitor)":""}</td><td>${esc(r.t||"")}</td><td>${r.r===1?"1 (yes)":r.r===0?"0 (no)":"–"}</td><td>${esc(r.x||"–")}</td></tr>`; }).join("");
+  const again = v => { const u = new URL(location.href); u.searchParams.delete("seed"); u.searchParams.set("reset","1"); if(v) u.searchParams.set("v",v); else u.searchParams.delete("v"); return u.toString(); };
+  app.innerHTML = `<div class="screen" style="max-width:820px">
+    <h1>${ONLY?"Test complete":"End of choices"}</h1>
+    <div class="note test">${ONLY?"<b>Test mode.</b> Nothing was saved. This is what would be recorded for this choice:":placeholder?"<b>Preview:</b> no Qualtrics link is set in config.js yet, so here's what would be sent.":"<b>Debug mode:</b> redirect paused."}</div>
+    <table class="res"><tr><th>ID</th><th>_v version</th><th>_c choice</th><th>_t seconds</th><th>_r follow-up</th><th>_x side.hovers mine.hovers theirs.clicks</th></tr>${rows}</table>
+    ${ONLY?`<a class="btn" href="${esc(again("A"))}">Try Version A</a><a class="btn" href="${esc(again("B"))}">Try Version B</a><a class="btn ghost" href="${esc(again(""))}">Random version</a>`
+      :`<p class="url">${esc(url)}</p><p style="font-size:13px">Link length: ${url.length} characters.</p><a class="btn ghost" href="${esc(again(""))}">Restart</a>`}
+  </div>`;
+}
+
+render();
+})();
+</script>
+</body>
+</html>

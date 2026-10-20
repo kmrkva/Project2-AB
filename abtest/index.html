@@ -1,0 +1,536 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Set Up Your A/B Test · Project 2</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../lab/lab.css">
+<style>
+:root{--bg:#FFFFFF;--card:#FFFFFF;--ink:#111827;--muted:#4B5563;--accent:#1D4ED8;--line:#D1D5DB;--soft:#F3F4F6;--ok:#15803D;--warn:#A16207;--bad:#B91C1C}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.55 Arial,Helvetica,sans-serif}
+a{color:var(--accent)}
+header{max-width:1240px;margin:0 auto;padding:32px 16px 4px}
+h1{font-size:30px;line-height:1.2;margin:0 0 10px}
+header p{color:var(--muted);max-width:760px;margin:8px 0}
+.cols{max-width:1240px;margin:0 auto;padding:16px 16px 80px;display:grid;grid-template-columns:minmax(0,1fr);gap:28px}
+@media (min-width:1020px){.cols{grid-template-columns:minmax(0,560px) minmax(0,1fr)}.previewcol{position:sticky;top:16px;align-self:start;max-height:calc(100vh - 32px);overflow:auto}}
+section.step{border-top:1px solid var(--line);padding:20px 0 22px}
+section.step:first-child{border-top:0;padding-top:4px}
+section.step h2{font-size:19px;margin:0 0 4px}
+h3.subq{font-size:16px;margin:18px 0 2px}
+.help{color:var(--muted);font-size:14.5px;margin:4px 0 12px}
+label.f{display:block;font-weight:600;font-size:14.5px;margin:12px 0 4px}
+input[type=text],input[type=number],textarea{width:100%;font:inherit;color:var(--ink);background:var(--bg);border:1px solid var(--line);border-radius:9px;padding:9px 11px}
+input:focus,textarea:focus{outline:2px solid var(--accent);outline-offset:1px}
+textarea{min-height:76px;resize:vertical}
+.row{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+@media (max-width:520px){.row{grid-template-columns:1fr}}
+.opt{display:flex;gap:10px;align-items:flex-start;padding:9px 12px;border:1px solid var(--line);border-radius:10px;margin:8px 0;cursor:pointer;background:var(--bg)}
+.opt input{margin-top:4px;accent-color:var(--accent)}
+.opt .t{font-weight:600}
+.opt .d{display:block;color:var(--muted);font-size:14px;font-weight:400}
+.opt.disabled{opacity:.5;cursor:not-allowed}
+.sub{margin:6px 0 4px 30px}
+.hidden{display:none !important}
+.idbox{display:flex;gap:10px;align-items:center}
+.idbox input{max-width:140px;font-family:"JetBrains Mono",monospace;font-weight:600}
+code,.mono{font-family:"JetBrains Mono",ui-monospace,monospace;font-size:13px;background:var(--soft);padding:1px 6px;border-radius:5px}
+.uploads{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px;margin-top:8px}
+@media (max-width:520px){.uploads{grid-template-columns:1fr}}
+.up{border:1.5px dashed var(--line);border-radius:12px;padding:10px;text-align:center;background:var(--bg);position:relative;min-height:170px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:6px;cursor:pointer}
+.up:hover,.up.drag{border-color:var(--accent)}
+.up input{position:absolute;inset:0;opacity:0;cursor:pointer}
+.up .lbl{font-weight:700;font-size:14px}
+.up .sm{color:var(--muted);font-size:12.5px}
+.up img{max-width:100%;max-height:100px;object-fit:contain;border-radius:6px;background:#fff}
+.checkgrid{display:grid;grid-template-columns:1fr 1fr;gap:0 12px}
+@media (max-width:520px){.checkgrid{grid-template-columns:1fr}}
+.extra{border-top:1px solid var(--line);padding:10px 0 4px}
+.extra:first-child{border-top:0}
+.extra .vals{margin:6px 0 0 30px}
+.extra .vals .row input{max-width:220px}
+.pv-head{display:flex;flex-wrap:wrap;gap:8px;align-items:center;justify-content:space-between;margin-bottom:10px}
+.pv-head h2{font-size:19px;margin:0}
+.seg{display:inline-flex;border:1px solid var(--line);border-radius:10px;overflow:hidden}
+.seg button,.tbtn{font:inherit;font-size:14px;font-weight:600;border:0;background:var(--card);color:var(--ink);padding:8px 12px;cursor:pointer}
+.seg button+button{border-left:1px solid var(--line)}
+.seg button.on{background:var(--ink);color:var(--bg)}
+.tbtn{border:1px solid var(--line);border-radius:10px}
+.tbtn.on{border-color:var(--accent);color:var(--accent)}
+.pvframe{border-radius:16px;padding:20px 16px;overflow:hidden}
+.pvnote{color:var(--muted);font-size:13.5px;margin:8px 2px 0}
+.checks{list-style:none;padding:0;margin:8px 0 14px}
+.checks li{padding:6px 0 6px 28px;position:relative;font-size:14.5px;color:var(--muted)}
+.checks li::before{position:absolute;left:4px;top:5px;font-weight:700}
+.checks li.ok::before{content:"✓";color:var(--ok)}
+.checks li.warn::before{content:"!";color:var(--warn);left:8px}
+.checks li.bad::before{content:"✕";color:var(--bad)}
+.checks li.bad{color:var(--ink)}
+.dl{display:block;width:100%;font:inherit;font-weight:700;font-size:22px;background:var(--accent);color:#fff;border:0;border-radius:14px;padding:22px 20px;cursor:pointer;box-shadow:0 4px 0 #1E3A8A;margin:8px 0 4px}
+.dl:hover:not(:disabled){background:#1E40AF}
+.dl:disabled{background:#9CA3AF;box-shadow:0 4px 0 #6B7280;cursor:not-allowed}
+.dlnote{font-size:14px;color:var(--muted);text-align:center;margin:6px 0 0}
+.submit{background:#B91C1C;color:#fff;border-radius:16px;padding:24px 24px 26px;margin:26px 0 8px}
+.submit h3{font-size:26px;line-height:1.2;margin:0 0 10px;color:#fff}
+.submit p{font-size:18px;line-height:1.5;margin:8px 0;color:#fff}
+.submit .mono{background:rgba(255,255,255,.18);color:#fff;font-size:16px}
+.submit .small{font-size:15px;opacity:.9}
+.submit.flash{animation:flash 1.2s ease 2}
+@keyframes flash{0%,100%{box-shadow:0 0 0 0 rgba(185,28,28,0)}50%{box-shadow:0 0 0 10px rgba(185,28,28,.35)}}
+.callout{background:var(--soft);border-left:4px solid var(--accent);border-radius:8px;padding:12px 14px;margin:12px 0;font-size:14.5px;color:var(--muted)}
+.callout b{color:var(--ink)}
+.cols-table{width:100%;border-collapse:collapse;font-size:14px;margin:8px 0}
+.cols-table td{border-bottom:1px solid var(--line);padding:6px 4px;color:var(--muted);vertical-align:top}
+.cols-table td:first-child{white-space:nowrap;padding-right:12px}
+.mini{display:inline-flex;gap:8px;align-items:center;font-size:14px;color:var(--muted);margin:6px 0 0;cursor:pointer}
+.mini input{accent-color:var(--accent);margin:0}
+.mobile-jump{display:inline-block;margin-top:6px;font-size:14px}
+@media (min-width:1020px){.mobile-jump{display:none}}
+</style>
+</head>
+<body>
+<header>
+  <h1>Designing Your A/B Test Survey</h1>
+  <p>Your test will typically be <b>one choice</b> between your client's product and the competitor. Half of participants will see your <b>original</b> product image (control/Version A) and half will see your <b>redesign</b> (Version B). Everything else stays the same including the competitor product, so if people are more likely to choose your product in Version B than in Version A, it must have been caused by your redesign.</p>
+  <p>Everyone's choices from class will eventually be combined into one study and shown to participants in a random order. The participants will be some combination of US adults from an online survey panel (Prolific) and people who you send the survey to (e.g., friends, family). Fill in each step below, check the live preview, then download your file. Test it a few times to confirm that you get both versions and that it looks good. When you're happy with it, submit it on Canvas.</p>
+  <a class="mobile-jump" href="#preview">Jump to the preview ↓</a>
+</header>
+
+<div class="cols">
+<form id="form" autocomplete="off" onsubmit="return false">
+
+<section class="step">
+  <h2>1. About you</h2>
+  <div class="row">
+    <div><label class="f" for="fn">First name</label><input type="text" id="fn"></div>
+    <div><label class="f" for="ln">Last name</label><input type="text" id="ln"></div>
+  </div>
+  <p style="margin:14px 0 0"><b>Your study ID:</b> <span class="mono" id="sid" style="font-size:15px;font-weight:700">–</span></p>
+  <p class="help" style="margin-top:12px">In the final data you'll find your results in these columns:</p>
+  <table class="cols-table">
+    <tr><td><code id="c_v">id_v</code></td><td>Which version this person saw: <b>A</b> = original, <b>B</b> = redesign</td></tr>
+    <tr><td><code id="c_c">id_c</code></td><td>Their choice: <b>1</b> = your client's product, <b>0</b> = competitor</td></tr>
+    <tr><td><code id="c_t">id_t</code></td><td>Decision time in seconds</td></tr>
+    <tr id="row_r" class="hidden"><td><code id="c_r">id_r</code></td><td>Answer to your follow-up question (step 9a): <b>1</b> = yes, <b>0</b> = no</td></tr>
+    <tr id="row_x" class="hidden"><td><code id="c_x">id_x</code></td><td>Side your product was on (L/R) . hovers on yours . hovers on the competitor . other clicks (on phones, taps count as hovers)</td></tr>
+  </table>
+  <label class="mini"><input type="checkbox" id="track">Also record hovers and clicks (optional; adds an <code id="c_x2">id_x</code> column)</label>
+</section>
+
+<section class="step">
+  <h2>2. The products</h2>
+  <label class="f" for="cat">Product category <span class="help">(optional, shown as the page heading)</span></label>
+  <input type="text" id="cat" placeholder="e.g., Sweatshirts">
+  <div class="row">
+    <div><label class="f" for="compBrand">Competitor brand</label><input type="text" id="compBrand" placeholder="e.g., Champion"></div>
+    <div><label class="f" for="clientBrand">Your client's brand</label><input type="text" id="clientBrand" placeholder="e.g., Kirkland"></div>
+  </div>
+  <label class="opt" style="margin-top:14px"><input type="checkbox" id="brandChange"><span><span class="t">My redesign changes the brand name</span><span class="d">Rare. Only check this if a new name or rebrand is part of your redesign.</span></span></label>
+  <div class="sub hidden" id="brandBWrap"><label class="f" for="clientBrandB">Brand name in your redesign (Version B)</label><input type="text" id="clientBrandB"></div>
+</section>
+
+<section class="step">
+  <h2>3. Your three images</h2>
+  <p class="help">Use just the product image for each, not a screenshot of the whole web page. Brand name, price and other details are added below the image automatically. All three images are shown in identical boxes, so exact pixel sizes don't matter.</p>
+  <div class="callout"><b>Keep it well-controlled.</b> Your original and redesign should differ <b>only</b> in what your redesign is meant to change. Any other difference could also explain your results. Check each box before uploading:</div>
+  <label class="opt"><input type="checkbox" class="wc"><span><span class="t">Same product</span><span class="d">Both show the same product, size, and version (for example, both the 20 oz bottle in the same color), unless that is what my redesign changes.</span></span></label>
+  <label class="opt"><input type="checkbox" class="wc"><span><span class="t">Same information</span><span class="d">Labels, text, and listed features show the same information in both, except for changes that are part of my redesign.</span></span></label>
+  <label class="opt"><input type="checkbox" class="wc"><span><span class="t">Same photo setup</span><span class="d">The camera angle, lighting, and how much of the image the product fills match in both, unless changing them is my redesign.</span></span></label>
+  <div class="uploads">
+    <label class="up" id="up_comp"><input type="file" accept="image/*" id="fComp"><span class="lbl">Competitor</span><span class="sm">Click or drop an image</span></label>
+    <label class="up" id="up_a"><input type="file" accept="image/*" id="fA"><span class="lbl">Original (A)</span><span class="sm">Click or drop an image</span></label>
+    <label class="up" id="up_b"><input type="file" accept="image/*" id="fB"><span class="lbl">Redesign (B)</span><span class="sm">Click or drop an image</span></label>
+  </div>
+  <label class="opt" style="margin-top:12px"><input type="checkbox" id="autofit" checked><span><span class="t">Trim empty margins (recommended)</span><span class="d">Removes plain white or solid-color space around each product, so all three products fill their boxes about the same. Turn off if the empty space is part of your redesign.</span></span></label>
+  <p class="help" style="margin-top:10px">Images aren't saved if you leave this page, so keep your files handy until you've downloaded.</p>
+</section>
+
+<section class="step">
+  <h2>4. Prices</h2>
+  <p class="help">We recommend <b>no prices</b> or the <b>same price for both</b>. A price difference can easily outweigh your redesign.</p>
+  <label class="opt"><input type="radio" name="pm" value="none" checked><span><span class="t">No prices (recommended)</span></span></label>
+  <label class="opt"><input type="radio" name="pm" value="same"><span><span class="t">Same price for both</span></span></label>
+  <div class="sub hidden" id="sameWrap"><label class="f" for="priceSame">Price ($)</label><input type="number" id="priceSame" min="0" step="0.01" placeholder="24.99" style="max-width:180px"></div>
+  <label class="opt"><input type="checkbox" id="priceOverride"><span><span class="t">Override the recommendation: use different prices</span><span class="d">For example, if the prices really differ, or your redesign is a price change.</span></span></label>
+  <div class="sub hidden" id="customWrap">
+    <label class="opt"><input type="radio" name="pm" value="custom"><span><span class="t">Different prices</span></span></label>
+    <div class="row">
+      <div><label class="f" for="pComp">Competitor price ($)</label><input type="number" id="pComp" min="0" step="0.01"></div>
+      <div><label class="f" for="pA">Your client's price ($)</label><input type="number" id="pA" min="0" step="0.01"></div>
+    </div>
+    <label class="opt" style="margin-top:10px"><input type="checkbox" id="pBdiff"><span><span class="t">My redesign changes my client's price</span><span class="d">Version B shows a different price for your client's product.</span></span></label>
+    <div class="sub hidden" id="pBWrap"><label class="f" for="pB">Your client's price in Version B ($)</label><input type="number" id="pB" min="0" step="0.01" style="max-width:180px"></div>
+  </div>
+</section>
+
+<section class="step">
+  <h2>5. The question</h2>
+  <p class="help">Shown above the two products. Any wording is fine; keep it short.</p>
+  <input type="text" id="question" value="Which would you choose?">
+</section>
+
+<section class="step">
+  <h2>6. Image display</h2>
+  <p class="help">The box behind each product image. White suits nearly all retail product photos. Pick black only if your images have dark backgrounds.</p>
+  <label class="opt"><input type="radio" name="bg" value="white" checked><span><span class="t">White (recommended)</span></span></label>
+  <label class="opt"><input type="radio" name="bg" value="gray"><span><span class="t">Light gray</span></span></label>
+  <label class="opt"><input type="radio" name="bg" value="black"><span><span class="t">Black</span></span></label>
+  <label class="f" style="margin-top:18px">Image box shape</label>
+  <p class="help">Both products always get the same box, so they appear the same size. Large or detailed images are fine; they're scaled to fit.</p>
+  <label class="opt"><input type="radio" name="shape" value="auto" checked><span><span class="t">Automatic (recommended)</span><span class="d" id="autoNote">Matches the shape of your images once uploaded.</span></span></label>
+  <div class="checkgrid">
+    <label class="opt"><input type="radio" name="shape" value="square"><span class="t">Square</span></label>
+    <label class="opt"><input type="radio" name="shape" value="tall"><span class="t">Tall (3:4)</span></label>
+    <label class="opt"><input type="radio" name="shape" value="wide"><span class="t">Wide (4:3)</span></label>
+    <label class="opt"><input type="radio" name="shape" value="xwide"><span class="t">Extra wide (2:1)</span></label>
+  </div>
+  <label class="f" style="margin-top:14px">Layout</label>
+  <label class="opt"><input type="radio" name="arrange" value="auto" checked><span><span class="t">Automatic (recommended)</span><span class="d">Side by side, or one above the other when the images are wide.</span></span></label>
+  <div class="checkgrid">
+    <label class="opt"><input type="radio" name="arrange" value="side"><span class="t">Side by side</span></label>
+    <label class="opt"><input type="radio" name="arrange" value="stack"><span class="t">One above the other</span></label>
+  </div>
+</section>
+
+<section class="step">
+  <h2>7. Extra listing details</h2>
+  <p class="help">By default each product shows only its image, brand, optional price and "Free Shipping · 30-Day Free Returns". No stars, reviews or badges.</p>
+  <label class="opt"><input type="checkbox" id="exOverride"><span><span class="t">Override the defaults: add listing details</span><span class="d">Each detail you add is the same for both products unless you choose otherwise.</span></span></label>
+  <div class="sub hidden" id="extrasWrap"></div>
+</section>
+
+<section class="step">
+  <h2>8. Helpful demographics</h2>
+  <p class="help">Which would be useful for analyzing your results? Check all that apply. These are <b>not added to your choice</b>; they help decide a short set of questions everyone gets at the start or end. Gender and age will almost certainly be included, plus possibly 1–3 others.</p>
+  <div class="checkgrid">
+    <label class="opt"><input type="checkbox" name="demo" value="gender"><span class="t">Gender</span></label>
+    <label class="opt"><input type="checkbox" name="demo" value="age"><span class="t">Age</span></label>
+    <label class="opt"><input type="checkbox" name="demo" value="student"><span class="t">Student or non-student</span></label>
+    <label class="opt"><input type="checkbox" name="demo" value="income"><span class="t">Household income</span></label>
+    <label class="opt"><input type="checkbox" name="demo" value="education"><span class="t">Education</span></label>
+  </div>
+  <label class="f" for="demoOther">Other (optional)</label>
+  <input type="text" id="demoOther" placeholder="e.g., Owns a pet">
+</section>
+
+<section class="step">
+  <h2>9. Follow-up questions</h2>
+  <h3 class="subq">9a. Does it work for likely buyers?</h3>
+  <p class="help">Optional question shown right below the two products. Answers go in your <code id="c_r2">id_r</code> column, so you can check whether your redesign works among people who would actually buy this kind of product.</p>
+  <label class="opt"><input type="checkbox" id="fuOn"><span><span class="t">Add this question below my choice</span></span></label>
+  <div class="sub hidden" id="fuWrap"><label class="f" for="fuText">Question wording (answered Yes or No)</label><input type="text" id="fuText" value="Would you buy a product like one of these in real life?"></div>
+  <p class="help" style="margin-top:18px">9b and 9c are <b>not added to your choice</b>. If you can measure something with <b>one simple question</b>, write it in; we might add it to the start or end of the study.</p>
+  <h3 class="subq">9b. Why will your redesign influence choices?</h3>
+  <label class="f" for="whyEffect">Your explanation</label>
+  <textarea id="whyEffect" placeholder="e.g., The new image makes the product seem more high-end."></textarea>
+  <label class="f" for="whyQ">One simple question to measure this (optional)</label>
+  <input type="text" id="whyQ" placeholder="e.g., How high-quality does this product seem? (1-7 scale; 1 = Very low, 7 = Very high)">
+  <h3 class="subq">9c. Who might be most affected?</h3>
+  <label class="f" for="modWhy">Who, and why?</label>
+  <textarea id="modWhy" placeholder="e.g., People who are familiar or unfamiliar with these products."></textarea>
+  <label class="f" for="modQ">One simple question to measure this (optional)</label>
+  <input type="text" id="modQ" placeholder="e.g., How familiar are you with the Kirkland brand?">
+</section>
+
+<section class="step" id="finish">
+  <h2>10. Check and download</h2>
+  <p class="help">Use the preview to flip between Version A and B. Only your redesign should change.</p>
+  <ul class="checks" id="checks"></ul>
+  <button type="button" class="dl" id="dl">⬇ Download my A/B test file</button>
+  <p class="dlnote" id="dlnote">Fix any items marked ✕ above to enable the download.</p>
+  <div class="submit" id="submitBox">
+    <h3>Last step: submit it on Canvas!</h3>
+    <p>Upload your downloaded file <span class="mono" id="zipname">…zip</span> to the Canvas assignment <b>“A/B Test Survey.”</b></p>
+    <p><b>Your choice is not included in the study until you submit it.</b> Downloading alone is not enough.</p>
+    <p class="small">After your instructor adds it to the site, you can test your choice on its own at <span class="mono" id="testlink">…</span></p>
+  </div>
+</section>
+</form>
+
+<div class="previewcol" id="preview">
+  <div class="pv-head">
+    <h2>Live preview</h2>
+    <div style="display:flex;gap:8px;flex-wrap:wrap">
+      <div class="seg"><button type="button" id="pvA" class="on">A · Original</button><button type="button" id="pvB">B · Redesign</button></div>
+      <button type="button" class="tbtn" id="pvFlip">Flip A/B</button>
+      <button type="button" class="tbtn" id="pvSwap">Swap sides</button>
+    </div>
+  </div>
+  <div class="lab pvframe"><div class="stage" id="stage"></div></div>
+  <p class="pvnote">This is exactly what participants see, on a computer. Phones show the same layout, smaller. Which side your product appears on is random for each participant.</p>
+</div>
+</div>
+
+<script src="../lab/lab.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
+<script>
+(function(){
+"use strict";
+const $ = id => document.getElementById(id);
+const SAVE_KEY = "abtest_builder_v1";
+const EXTRAS = [
+  {k:"stars",   label:"Star rating",            type:"number", def:"4.5",  step:"0.1", min:"1", max:"5", note:"1.0 to 5.0"},
+  {k:"reviews", label:"Review count",           type:"number", def:"1250", step:"1",   min:"0", note:"Shown in parentheses next to the stars"},
+  {k:"bought",  label:"“Bought in past month”", type:"text",   def:"1K+",  note:"Shows as “1K+ bought in past month”"},
+  {k:"badge",   label:"Badge on the image",     type:"text",   def:"Best Seller", note:"To show it on only one product, check “different for each” and leave the other blank"}
+];
+$("extrasWrap").innerHTML = EXTRAS.map(e=>{
+  const attrs = `type="${e.type}"${e.step?` step="${e.step}"`:""}${e.min?` min="${e.min}"`:""}${e.max?` max="${e.max}"`:""}`;
+  return `<div class="extra">
+    <label class="opt"><input type="checkbox" id="ex_${e.k}"><span><span class="t">${e.label}</span><span class="d">${e.note}</span></span></label>
+    <div class="vals hidden" id="exv_${e.k}">
+      <div id="exs_${e.k}"><label class="f" for="ex_${e.k}_both">Value for both products</label><input ${attrs} id="ex_${e.k}_both" value="${e.def}" style="max-width:220px"></div>
+      <label class="opt" style="margin-top:8px"><input type="checkbox" id="ex_${e.k}_sep"><span class="t">Different for each product</span></label>
+      <div class="row hidden" id="exd_${e.k}">
+        <div><label class="f" for="ex_${e.k}_comp">Competitor</label><input ${attrs} id="ex_${e.k}_comp" value="${e.def}"></div>
+        <div><label class="f" for="ex_${e.k}_client">Your client</label><input ${attrs} id="ex_${e.k}_client" value="${e.def}"></div>
+      </div>
+    </div></div>`;
+}).join("");
+
+/* ---------- images ---------- */
+const IMG = {comp:null, a:null, b:null};
+const slots = [["comp","fComp","up_comp","Competitor"],["a","fA","up_a","Original (A)"],["b","fB","up_b","Redesign (B)"]];
+/* Find the product inside plain margins: if all four corners share one color (or are transparent),
+   everything close to that color around the edges counts as empty margin. */
+function findTrim(im, w, h){
+  const s = Math.min(1, 400/Math.max(w,h)), aw = Math.max(1,Math.round(w*s)), ah = Math.max(1,Math.round(h*s));
+  const cv = document.createElement("canvas"); cv.width = aw; cv.height = ah;
+  const cx = cv.getContext("2d", {willReadFrequently:true}); cx.drawImage(im,0,0,aw,ah);
+  const px = cx.getImageData(0,0,aw,ah).data, at = (x,y)=>{ const i=(y*aw+x)*4; return [px[i],px[i+1],px[i+2],px[i+3]]; };
+  const TOL = 28, near = (p,q)=> (p[3]<16 && q[3]<16) || (p[3]>=16 && q[3]>=16 && Math.max(Math.abs(p[0]-q[0]),Math.abs(p[1]-q[1]),Math.abs(p[2]-q[2]))<=TOL);
+  const bg = at(0,0), corners = [at(aw-1,0), at(0,ah-1), at(aw-1,ah-1)];
+  if(!corners.every(c=>near(c,bg))) return null;              // no uniform background: leave as is
+  let x0=aw, y0=ah, x1=-1, y1=-1;
+  for(let y=0;y<ah;y++) for(let x=0;x<aw;x++){ if(!near(at(x,y),bg)){ if(x<x0)x0=x; if(x>x1)x1=x; if(y<y0)y0=y; if(y>y1)y1=y; } }
+  if(x1<0) return null;                                       // blank image
+  let rx = x0/s, ry = y0/s, rw = (x1-x0+1)/s, rh = (y1-y0+1)/s;
+  const pad = 0.03*Math.max(rw,rh);
+  rx = Math.max(0, rx-pad); ry = Math.max(0, ry-pad); rw = Math.min(w-rx, rw+2*pad); rh = Math.min(h-ry, rh+2*pad);
+  if(rw*rh > 0.92*w*h) return null;                           // margins too small to matter
+  return {x:Math.round(rx), y:Math.round(ry), w:Math.round(rw), h:Math.round(rh)};
+}
+function renderVersion(im, r){ // crop r, max 1600px long side, keeps transparency
+  return new Promise(res=>{
+    const sc = Math.min(1, 1600/Math.max(r.w,r.h)), w = Math.max(1,Math.round(r.w*sc)), h = Math.max(1,Math.round(r.h*sc));
+    const cv = document.createElement("canvas"); cv.width = w; cv.height = h;
+    const cx = cv.getContext("2d"); cx.imageSmoothingQuality = "high"; cx.drawImage(im, r.x, r.y, r.w, r.h, 0, 0, w, h);
+    cv.toBlob(b=>res({url:URL.createObjectURL(b), w, h}), "image/png");
+  });
+}
+function setImage(key, file){
+  if(!file || !/^image\//.test(file.type)) return;
+  const src = URL.createObjectURL(file), im = new Image();
+  im.onload = async ()=>{
+    const w = im.naturalWidth, h = im.naturalHeight, trim = findTrim(im, w, h);
+    const full = await renderVersion(im, {x:0,y:0,w,h}), trimmed = trim ? await renderVersion(im, trim) : null;
+    URL.revokeObjectURL(src);
+    if(IMG[key]){ URL.revokeObjectURL(IMG[key].full.url); if(IMG[key].trimmed) URL.revokeObjectURL(IMG[key].trimmed.url); }
+    IMG[key] = {name:file.name, w, h, full, trimmed};
+    drawUpload(key); update();
+  };
+  im.onerror = ()=>{ URL.revokeObjectURL(src); alert("That file couldn't be opened as an image. Try saving it as a PNG or JPG."); };
+  im.src = src;
+}
+const useTrim = ()=>$("autofit").checked;
+const shown = d => d && (useTrim() && d.trimmed ? d.trimmed : d.full);   // the version participants will see
+function drawUpload(key){
+  const [ , inputId, boxId, label] = slots.find(s=>s[0]===key), box = $(boxId), d = IMG[key], v = shown(d);
+  box.querySelectorAll("img,.sm,.lbl").forEach(n=>n.remove());
+  box.insertAdjacentHTML("beforeend", `<span class="lbl">${label}</span>${d?`<img src="${v.url}" alt=""><span class="sm">${LAB.esc(d.name)}<br>${useTrim()&&d.trimmed?"margins trimmed · ":""}click to replace</span>`:`<span class="sm">Click or drop an image</span>`}`);
+}
+slots.forEach(([key,inputId,boxId])=>{
+  $(inputId).addEventListener("change", e=>setImage(key, e.target.files[0]));
+  const box = $(boxId);
+  box.addEventListener("dragover", e=>{ e.preventDefault(); box.classList.add("drag"); });
+  box.addEventListener("dragleave", ()=>box.classList.remove("drag"));
+  box.addEventListener("drop", e=>{ e.preventDefault(); box.classList.remove("drag"); setImage(key, e.dataTransfer.files[0]); });
+});
+
+/* ---------- read the form ---------- */
+const val = id => ($(id).value||"").trim();
+const num = id => { const v = $(id).value; return v===""||v==null ? null : Number(v); };
+const radio = name => (document.querySelector(`input[name=${name}]:checked`)||{}).value;
+function makeId(){
+  const clean = s => s.normalize("NFD").replace(/[̀-ͯ]/g,"").toLowerCase().replace(/[^a-z]/g,"");
+  return (clean(val("fn")).slice(0,1) + clean(val("ln")).slice(0,2));
+}
+
+/* Box shape: automatic = average shape of the three images participants will see, kept between 0.6 and 2.5. */
+const SHAPES = {square:1, tall:0.75, wide:4/3, xwide:2};
+function autoRatio(){
+  const ks = ["comp","a","b"].filter(k=>IMG[k]); if(!ks.length) return 1;
+  const avg = ks.reduce((t,k)=>{ const v = shown(IMG[k]); return t + v.w/v.h; }, 0) / ks.length;
+  return Math.round(Math.min(2.5, Math.max(0.6, avg))*100)/100;
+}
+function boxRatio(){ const sh = radio("shape"); return SHAPES[sh] || autoRatio(); }
+function shapeName(r){ return r < 0.9 ? "tall" : r <= 1.12 ? "about square" : r < 1.6 ? "wide" : "extra wide"; }
+function readStudy(){
+  const pm = radio("pm"), price = pm==="same" ? {mode:"same", value:num("priceSame")}
+    : pm==="custom" ? {mode:"custom", comp:num("pComp"), clientA:num("pA"), clientB:$("pBdiff").checked ? num("pB") : num("pA")}
+    : {mode:"none"};
+  const extras = {};
+  if($("exOverride").checked) EXTRAS.forEach(e=>{
+    if(!$("ex_"+e.k).checked) return;
+    const read = id => e.type==="number" ? num(id) : val(id);
+    extras[e.k] = $(`ex_${e.k}_sep`).checked ? {comp:read(`ex_${e.k}_comp`), client:read(`ex_${e.k}_client`)} : (v=>({comp:v, client:v}))(read(`ex_${e.k}_both`));
+  });
+  return {
+    id: makeId(), category: val("cat"), question: val("question") || "Which would you choose?", bg: radio("bg") || "white",
+    comp: {brand: val("compBrand"), img: IMG.comp && shown(IMG.comp).url},
+    client: {brandA: val("clientBrand"), brandB: $("brandChange").checked ? val("clientBrandB") : val("clientBrand"),
+             imgA: IMG.a && shown(IMG.a).url, imgB: IMG.b && shown(IMG.b).url},
+    price, extras,
+    layout: {shape: radio("shape")||"auto", arrange: radio("arrange")||"auto", ratio: boxRatio()},
+    track: $("track").checked,
+    followup: $("fuOn").checked ? {on:true, text: val("fuText") || LAB.FOLLOWUP_DEFAULT} : {on:false}
+  };
+}
+
+/* ---------- checks ---------- */
+function checks(s){
+  const out = [], bad = t=>out.push(["bad",t]), warn = t=>out.push(["warn",t]), ok = t=>out.push(["ok",t]);
+  if(!val("fn") || !val("ln")) bad("Enter your first and last name (step 1).");
+  else if(!/^[a-z]{2,3}$/.test(s.id)) bad("Your name needs letters A–Z to make your study ID (step 1).");
+  if(document.querySelectorAll(".wc:not(:checked)").length) bad("Check the three “keep it well-controlled” boxes (step 3).");
+  if(!s.comp.brand || !s.client.brandA) bad("Enter both brand names (step 2).");
+  if($("brandChange").checked && !val("clientBrandB")) bad("Enter the brand name for your redesign (step 2).");
+  const missing = slots.filter(([k])=>!IMG[k]).map(x=>x[3]);
+  if(missing.length) bad(`Upload: ${missing.join(", ")} (step 3).`);
+  else {
+    ok("All three images uploaded.");
+    const V = k => shown(IMG[k]), ratio = k => V(k).w / V(k).h, diff = (p,q) => Math.max(p,q)/Math.min(p,q) - 1;
+    const trimmedAny = useTrim() && slots.some(([k])=>IMG[k].trimmed);
+    if(trimmedAny) ok("Empty margins trimmed so the products fill their boxes similarly.");
+    if(diff(ratio("a"), ratio("b")) > 0.08)
+      warn("Your original and redesign have noticeably different shapes, so the product may look bigger or smaller in one version. Usually they should match, unless the change in shape or framing is part of your redesign. Compare them with Flip A/B.");
+    else ok("Original and redesign are the same shape.");
+    if(diff(ratio("comp"), (ratio("a")+ratio("b"))/2) > 0.35)
+      warn("The competitor's image is a quite different shape from yours (for example, wide vs. tall), so one product may look larger. Similar shapes are better; check the preview.");
+  }
+  if(s.price.mode==="same" && !(s.price.value>=0 && s.price.value!==null)) bad("Enter the price (step 4).");
+  if(s.price.mode==="custom"){
+    if(s.price.comp==null || s.price.clientA==null) bad("Enter both prices (step 4).");
+    else warn("You're using different prices. Make sure that's intentional.");
+    if($("pBdiff").checked && s.price.clientB==null) bad("Enter your client's Version B price (step 4).");
+  }
+  if($("priceOverride").checked && s.price.mode!=="custom") warn("You checked the price override but didn't select “Different prices” (step 4).");
+  if($("exOverride").checked && !Object.keys(s.extras).length) warn("You turned on extra listing details but didn't pick any (step 7).");
+  if(s.extras.stars){ const v=[s.extras.stars.comp,s.extras.stars.client]; if(v.some(x=>x==null||x<1||x>5)) bad("Star ratings must be between 1 and 5 (step 7)."); }
+  return out;
+}
+
+/* ---------- preview ---------- */
+let pv = {v:"A", clientLeft:true, flip:null};
+function drawPreview(s){ $("stage").innerHTML = LAB.trialHTML(s, pv.v, pv.clientLeft); $("stage").querySelectorAll(".buy").forEach(b=>b.addEventListener("click",()=>{ b.closest(".card").classList.toggle("chosen"); }));
+  $("stage").querySelectorAll(".fbtn").forEach(f=>f.addEventListener("click",()=>{ $("stage").querySelectorAll(".fbtn").forEach(x=>x.classList.toggle("on", x===f)); })); }
+function setV(v){ pv.v = v; $("pvA").classList.toggle("on", v==="A"); $("pvB").classList.toggle("on", v==="B"); update(); }
+$("pvA").onclick = ()=>{ stopFlip(); setV("A"); };
+$("pvB").onclick = ()=>{ stopFlip(); setV("B"); };
+function stopFlip(){ if(pv.flip){ clearInterval(pv.flip); pv.flip=null; $("pvFlip").classList.remove("on"); $("pvFlip").textContent="Flip A/B"; } }
+$("pvFlip").onclick = ()=>{ if(pv.flip) return stopFlip(); $("pvFlip").classList.add("on"); $("pvFlip").textContent="Stop flipping"; pv.flip = setInterval(()=>setV(pv.v==="A"?"B":"A"), 900); };
+$("pvSwap").onclick = ()=>{ pv.clientLeft = !pv.clientLeft; update(); };
+
+/* ---------- show/hide ---------- */
+function toggles(){
+  $("brandBWrap").classList.toggle("hidden", !$("brandChange").checked);
+  $("sameWrap").classList.toggle("hidden", radio("pm")!=="same");
+  const ov = $("priceOverride").checked;
+  $("customWrap").classList.toggle("hidden", !ov);
+  if(!ov && radio("pm")==="custom") document.querySelector('input[name=pm][value=none]').checked = true;
+  $("pBWrap").classList.toggle("hidden", !$("pBdiff").checked);
+  $("fuWrap").classList.toggle("hidden", !$("fuOn").checked);
+  $("row_r").classList.toggle("hidden", !$("fuOn").checked);
+  $("row_x").classList.toggle("hidden", !$("track").checked);
+  $("extrasWrap").classList.toggle("hidden", !$("exOverride").checked);
+  EXTRAS.forEach(e=>{
+    $("exv_"+e.k).classList.toggle("hidden", !$("ex_"+e.k).checked);
+    const sep = $(`ex_${e.k}_sep`).checked;
+    $("exd_"+e.k).classList.toggle("hidden", !sep); $("exs_"+e.k).classList.toggle("hidden", sep);
+  });
+}
+
+let lastTrim = null;
+function update(){
+  toggles();
+  if(lastTrim !== useTrim()){ lastTrim = useTrim(); slots.forEach(([k])=>{ if(IMG[k]) drawUpload(k); }); }
+  const s = readStudy(), id = s.id || "id";
+  $("sid").textContent = s.id || "–";
+  { const r = autoRatio(), lay = LAB.layoutOf({layout:{ratio:r, arrange:"auto"}});
+    $("autoNote").textContent = ["comp","a","b"].some(k=>IMG[k]) ? `Your images: ${shapeName(r)} (${r}:1), shown ${lay.stack?"one above the other":"side by side"}.` : "Matches the shape of your images once uploaded."; }
+  ["v","c","t","x","r","x2","r2"].forEach(k=>$("c_"+k).textContent = `${id}_${k.slice(0,1)}`);
+  $("zipname").textContent = `${id}_abtest.zip`;
+  $("testlink").textContent = `kmrkva.github.io/Project2/lab/?only=${id}`;
+  drawPreview(s);
+  const list = checks(s);
+  $("checks").innerHTML = list.map(([k,t])=>`<li class="${k}">${LAB.esc(t)}</li>`).join("");
+  $("dl").disabled = list.some(x=>x[0]==="bad");
+  $("dlnote").textContent = $("dl").disabled ? "Fix any items marked ✕ above to enable the download." : "Saves a .zip file to your Downloads folder.";
+  saveForm();
+}
+
+/* ---------- remember typed answers (not images) ---------- */
+function fields(){ return [...document.querySelectorAll("#form input:not([type=file]), #form textarea")]; }
+function saveForm(){
+  const d = {}; fields().forEach(el=>{ const k = el.id || (el.name+":"+el.value); d[k] = (el.type==="checkbox"||el.type==="radio") ? el.checked : el.value; });
+  try{ localStorage.setItem(SAVE_KEY, JSON.stringify(d)); }catch(e){}
+}
+function restoreForm(){
+  let d; try{ d = JSON.parse(localStorage.getItem(SAVE_KEY)); }catch(e){} if(!d) return;
+  fields().forEach(el=>{ const k = el.id || (el.name+":"+el.value); if(!(k in d)) return; if(el.type==="checkbox"||el.type==="radio") el.checked = !!d[k]; else el.value = d[k]; });
+}
+
+/* ---------- download ---------- */
+function processImage(key, bg){ // the version participants see, flattened onto the chosen background, saved as JPG
+  return new Promise((res,rej)=>{
+    const d = shown(IMG[key]), im = new Image();
+    im.onload = ()=>{
+      const w = d.w, h = d.h;
+      const cv = document.createElement("canvas"); cv.width = w; cv.height = h;
+      const cx = cv.getContext("2d"); cx.fillStyle = bg; cx.fillRect(0,0,w,h); cx.imageSmoothingQuality = "high"; cx.drawImage(im,0,0,w,h);
+      cv.toBlob(b=>b?res(b):rej(new Error("encode")), "image/jpeg", 0.9);
+    };
+    im.onerror = rej; im.src = d.url;
+  });
+}
+$("dl").onclick = async ()=>{
+  const s = readStudy(); if(checks(s).some(x=>x[0]==="bad")) return;
+  const btn = $("dl"); btn.disabled = true; btn.textContent = "Preparing…";
+  try{
+    const bg = LAB.bgColor(s), zip = new JSZip(), dir = zip.folder(s.id);
+    const study = {
+      builder:"abtest-1", created:new Date().toISOString(),
+      id:s.id, name:{first:val("fn"), last:val("ln")},
+      category:s.category, question:s.question, bg:s.bg,
+      comp:{brand:s.comp.brand, img:"comp.jpg"},
+      client:{brandA:s.client.brandA, brandB:s.client.brandB, imgA:"a.jpg", imgB:"b.jpg"},
+      price:s.price, extras:s.extras, layout:s.layout, track:s.track, followup:s.followup,
+      survey:{ demographics:[...document.querySelectorAll("input[name=demo]:checked")].map(x=>x.value),
+               demographicsOther:val("demoOther"), whyEffect:val("whyEffect"), whyQuestion:val("whyQ"), whoAffected:val("modWhy"), whoQuestion:val("modQ") },
+      imageInfo:Object.fromEntries(slots.map(([k])=>[k,{file:IMG[k].name, w:IMG[k].w, h:IMG[k].h, trimmed:!!(useTrim() && IMG[k].trimmed)}]))
+    };
+    dir.file("study.json", JSON.stringify(study, null, 2));
+    dir.file("comp.jpg", await processImage("comp", bg));
+    dir.file("a.jpg", await processImage("a", bg));
+    dir.file("b.jpg", await processImage("b", bg));
+    const blob = await zip.generateAsync({type:"blob"});
+    const a = document.createElement("a"); a.href = URL.createObjectURL(blob); a.download = `${s.id}_abtest.zip`; document.body.appendChild(a); a.click(); a.remove();
+    setTimeout(()=>URL.revokeObjectURL(a.href), 4000);
+    btn.textContent = "Downloaded ✓ (download again)";
+    const box = $("submitBox"); box.scrollIntoView({behavior:"smooth", block:"center"}); box.classList.remove("flash"); void box.offsetWidth; box.classList.add("flash");
+  }catch(e){ btn.textContent = "Something went wrong. Try again"; console.error(e); }
+  finally{ btn.disabled = false; }
+};
+
+restoreForm();
+document.getElementById("form").addEventListener("input", update);
+document.getElementById("form").addEventListener("change", update);
+update();
+})();
+</script>
+</body>
+</html>
